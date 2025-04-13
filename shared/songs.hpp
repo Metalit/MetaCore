@@ -1,0 +1,54 @@
+#pragma once
+
+#include "GlobalNamespace/BeatmapKey.hpp"
+#include "GlobalNamespace/BeatmapLevel.hpp"
+#include "GlobalNamespace/BeatmapLevelPack.hpp"
+#include "GlobalNamespace/IReadonlyBeatmapData.hpp"
+#include "UnityEngine/Sprite.hpp"
+
+namespace MetaCore::Songs {
+    /// @brief Finds the hash in a level id
+    /// @param levelId The level id
+    /// @return The hash of the level if found, otherwise an empty string
+    std::string GetHash(std::string levelId);
+    /// @brief Finds the hash in a beatmap key
+    /// @param beatmap The beatmap key
+    /// @return The hash of the beatmap key if found, otherwise an empty string
+    std::string GetHash(GlobalNamespace::BeatmapKey beatmap);
+    /// @brief Finds the hash in a beatmap level
+    /// @param beatmap The beatmap level
+    /// @return The hash of the beatmap level if found, otherwise an empty string
+    std::string GetHash(GlobalNamespace::BeatmapLevel* beatmap);
+
+    /// @brief Asynchronously retrieves the BeatmapData of a beatmap, will only run one task per beatmap at a time
+    /// @param beatmap The beatmap key
+    /// @param callback The callback with the data once it has been retrieved, or nullptr if it fails
+    void GetBeatmapData(GlobalNamespace::BeatmapKey beatmap, std::function<void(GlobalNamespace::IReadonlyBeatmapData*)> callback);
+
+    /// @brief Asynchronously retrieves the cover sprite of a beatmap
+    /// @param beatmap The beatmap level
+    /// @param callback The callback with the sprite once it has been retrieved, or nullptr if it fails
+    void GetSongCover(GlobalNamespace::BeatmapLevel* beatmap, std::function<void(UnityEngine::Sprite*)> callback);
+
+    /// @brief Finds the BeatmapLevel for a level id
+    /// @param levelId The level id
+    /// @return The beatmap level, or nullptr if not found
+    GlobalNamespace::BeatmapLevel* FindLevel(std::string levelId);
+    /// @brief Finds the BeatmapLevel for a beatmap key
+    /// @param beatmap The beatmap key
+    /// @return The beatmap level, or nullptr if not found
+    GlobalNamespace::BeatmapLevel* FindLevel(GlobalNamespace::BeatmapKey beatmap);
+
+    /// @brief Gets the currently selected beatmap key
+    /// @param last If the last selected beatmap should be returned even if the detail view has been closed
+    /// @return The currently selected beatmap key, or default if none
+    GlobalNamespace::BeatmapKey GetSelectedKey(bool last = true);
+    /// @brief Gets the currently selected beatmap level
+    /// @param last If the last selected beatmap should be returned even if the detail view has been closed
+    /// @return The currently selected beatmap level, or nullptr if none
+    GlobalNamespace::BeatmapLevel* GetSelectedLevel(bool last = true);
+
+    /// @brief Plays the preview audio of a level
+    /// @param beatmap The level to play the preview of
+    void PlayLevelPreview(GlobalNamespace::BeatmapLevel* beatmap);
+}
