@@ -6,7 +6,7 @@
     "name": "MetaCore",
     "id": "metacore",
     "version": "1.0.0",
-    "url": null,
+    "url": "https://github.com/Metalit/MetaCore",
     "additionalData": {
       "overrideSoName": "libmetacore.so",
       "cmake": true
