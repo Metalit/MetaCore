@@ -4,6 +4,9 @@
 #include "UnityEngine/Graphics.hpp"
 #include "UnityEngine/ImageConversion.hpp"
 #include "UnityEngine/Rect.hpp"
+#include "UnityEngine/RenderTexture.hpp"
+#include "UnityEngine/RenderTextureFormat.hpp"
+#include "UnityEngine/RenderTextureReadWrite.hpp"
 #include "UnityEngine/TextureFormat.hpp"
 #include "beatsaber-hook/shared/utils/il2cpp-utils.hpp"
 #include "main.hpp"
@@ -86,13 +89,16 @@ static Texture2D* GetReadable(Texture2D* texture, Rect bounds) {
     if (texture->isReadable)
         return texture;
 
-    static auto CopyTexture = il2cpp_utils::resolve_icall<void, Texture*, int, int, int, int, int, int, Texture*, int, int, int, int>(
-        "UnityEngine.Graphics::CopyTexture_Region"
-    );
+    auto ret = Texture2D::New_ctor(bounds.m_Width, bounds.m_Height, texture->format, false, false);
 
-    auto temp = Texture2D::New_ctor(bounds.m_Width, bounds.m_Height, texture->format, false, false);
-    CopyTexture(texture, 0, 0, bounds.m_XMin, bounds.m_YMin, bounds.m_Width, bounds.m_Height, temp, 0, 0, 0, 0);
-    return temp;
+    auto temp = UnityEngine::RenderTexture::GetTemporary(
+        texture->width, texture->height, 0, UnityEngine::RenderTextureFormat::Default, UnityEngine::RenderTextureReadWrite::Default
+    );
+    UnityEngine::Graphics::Blit(texture, temp);
+    ret->ReadPixels(bounds, 0, 0);
+    UnityEngine::RenderTexture::ReleaseTemporary(temp);
+
+    return ret;
 }
 
 ArrayW<Color> MetaCore::Engine::ScalePixels(Texture2D* texture, int width, int height, Rect bounds) {
