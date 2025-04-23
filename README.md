@@ -32,6 +32,10 @@ Provides the ability to register callbacks to and broadcast events, with some av
 
 Provides utilities for various aspects of Beat Saber game state and singletons.
 
+### `il2cpp.hpp`
+
+Provides experimental utilities and wrappers for Il2Cpp types.
+
 ### `internals.hpp`
 
 Allows access and modification to the internal statistics tracked by the mod, in case another mod changes them in an unusual way.
