@@ -47,6 +47,7 @@ DECLARE_CLASS_CODEGEN(MetaCore, MainThreadScheduler, UnityEngine::MonoBehaviour)
    public:
     static void Schedule(std::function<void()> callback);
     static void Schedule(std::function<bool()> wait, std::function<void()> callback);
+    static void AddUpdate(std::function<void()> callback);
 
     template <class T>
     static void Await(T task, std::function<void()> callback) {

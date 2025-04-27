@@ -189,6 +189,10 @@ void MetaCore::Engine::SetOnDestroy(TransformWrapper object, std::function<void(
     GetOrAddComponent<ObjectSignal*>(object)->onDestroy = std::move(callback);
 }
 
+void MetaCore::Engine::ScheduleOnUpdate(std::function<void()> callback) {
+    MainThreadScheduler::AddUpdate(std::move(callback));
+}
+
 // math from https://stackoverflow.com/a/20249699
 void MetaCore::Engine::QuaternionAverage::AddRotation(Quaternion rot) {
     // remove y rotation from average on 360 degree levels

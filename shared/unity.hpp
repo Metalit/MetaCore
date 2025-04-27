@@ -149,6 +149,10 @@ namespace MetaCore::Engine {
     /// @param callback The callback to run when the object is destroyed
     void SetOnDestroy(TransformWrapper object, std::function<void()> callback);
 
+    /// @brief Schedules a function to be run every frame for the rest of the application
+    /// @param callback The function to be run every frame
+    void ScheduleOnUpdate(std::function<void()> callback);
+
     /// @brief A struct to calculate the average of a number of rotations
     struct QuaternionAverage {
        public:
