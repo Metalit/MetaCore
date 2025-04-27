@@ -6,23 +6,41 @@
 namespace MetaCore::Events {
     /// @brief The global ids of all built-in events
     enum Events {
+        // After any change to the current or maximum score
         ScoreChanged,
+        // After any note is cut, good or bad, and the computation for it is finished
         NoteCut,
+        // After any basic or chain note is missed
         NoteMissed,
+        // After a bomb is cut
         BombCut,
+        // After any wall is entered, even if the player was already inside one
         WallHit,
+        // After any change to the combo
         ComboChanged,
+        // After any change to the player health / energy
         HealthChanged,
+        // Once per frame during a map, after the song time updates
         Update,
+        // 4 times per second, unless the framerate is somehow lower
         SlowUpdate,
+        // After a new map or difficulty is selected in the menu
         MapSelected,
+        // After the current map is deselected without a new one being selected
         MapDeselected,
+        // After a new map is started and stats are available
         MapStarted,
+        // After a map is paused
         MapPaused,
+        // After a map is unpaused
         MapUnpaused,
+        // After a map is restarted
         MapRestarted,
+        // Immediately when a map ends
         MapEnded,
+        // After a map ends and the scene has transitioned back to the menu
         GameplaySceneEnded,
+        // After the score submission status changes
         ScoreSubmission,
         EventMax = ScoreSubmission,
     };

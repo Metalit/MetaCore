@@ -16,7 +16,7 @@ namespace MetaCore::Game {
     /// @param mod The unique id of the mod modifying score submission
     /// @param enable If score submission should be enabled for this mod
     void SetScoreSubmission(std::string mod, bool enable);
-    /// @brief Disables score submission for a mod for the current song only, reenabling on the next MapEnded event
+    /// @brief Disables score submission for a mod for the current song only, reenabling on the next GameplaySceneEnded event
     /// @param mod The unique id of the mod modifying score submission
     void DisableScoreSubmissionOnce(std::string mod);
     /// @brief Gets if score submission is currently disabled
