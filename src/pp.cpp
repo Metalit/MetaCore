@@ -18,7 +18,7 @@ using namespace MetaCore;
 
 static CacheMap<std::string, std::pair<std::optional<PP::BLSongDiff>, std::optional<PP::SSSongDiff>>, 32> songCache;
 
-struct request {
+struct Request {
     using callback = std::function<void(std::optional<PP::BLSongDiff>, std::optional<PP::SSSongDiff>)>;
 
     std::string const key;
@@ -51,11 +51,11 @@ struct request {
         return CheckDone();
     }
 
-    request() = default;
-    request(std::string key) : key(std::move(key)) {}
+    Request() = default;
+    Request(std::string key) : key(std::move(key)) {}
 };
 
-static std::map<std::string, request> requests;
+static std::map<std::string, Request> requests;
 
 static constexpr double ScoresaberMult = 42.117208413;
 

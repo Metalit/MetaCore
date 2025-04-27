@@ -12,7 +12,6 @@
 
 namespace MetaCore::Game {
     /// @brief Enables or disables score submission for a mod. Score submission will only be enabled if no mods have it disabled
-    /// @details description
     /// @param mod The unique id of the mod modifying score submission
     /// @param enable If score submission should be enabled for this mod
     void SetScoreSubmission(std::string mod, bool enable);

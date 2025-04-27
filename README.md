@@ -36,6 +36,10 @@ Provides utilities for various aspects of Beat Saber game state and singletons.
 
 Provides experimental utilities and wrappers for Il2Cpp types.
 
+### `input.hpp`
+
+Provides utilities for managing controllers and their input.
+
 ### `internals.hpp`
 
 Allows access and modification to the internal statistics tracked by the mod, in case another mod changes them in an unusual way.

@@ -1,5 +1,6 @@
 #include "events.hpp"
 
+#include "input.hpp"
 #include "main.hpp"
 #include "maps.hpp"
 

@@ -16,6 +16,7 @@
 #include "GlobalNamespace/MultiplayerLocalActivePlayerInGameMenuController.hpp"
 #include "GlobalNamespace/NoteController.hpp"
 #include "GlobalNamespace/NoteCutInfo.hpp"
+#include "GlobalNamespace/OVRInput.hpp"
 #include "GlobalNamespace/PartyFreePlayFlowCoordinator.hpp"
 #include "GlobalNamespace/PauseMenuManager.hpp"
 #include "GlobalNamespace/ScoreController.hpp"
@@ -36,6 +37,7 @@
 #include "custom-types/shared/coroutine.hpp"
 #include "events.hpp"
 #include "game.hpp"
+#include "input.hpp"
 #include "internals.hpp"
 #include "main.hpp"
 #include "songs.hpp"
@@ -482,7 +484,7 @@ MAKE_AUTO_HOOK_MATCH(
     auto key = self->missionNode->missionData->beatmapKey;
     Internals::SetLevel(key, Songs::FindLevel(key));
 
-    auto signal = MetaCore::Engine::GetOrAddComponent<ObjectSignal*>(self);
+    auto signal = Engine::GetOrAddComponent<ObjectSignal*>(self);
     signal->onEnable = [key]() {
         Internals::SetLevel(key, Songs::FindLevel(key));
     };
@@ -491,13 +493,23 @@ MAKE_AUTO_HOOK_MATCH(
     MissionLevelDetailViewController_RefreshContent(self);
 }
 
+// run input button events
+MAKE_AUTO_HOOK_MATCH(OVRInput_Update, &OVRInput::Update, void) {
+    OVRInput_Update();
+
+    for (int i = 0; i <= Input::ButtonsMax; i++) {
+        if (Input::GetPressed(Input::Either, (Input::Buttons) i))
+            Events::Broadcast(Input::ButtonEvents, i);
+    }
+}
+
 // run keyboard closed callbacks
 MAKE_AUTO_HOOK_MATCH(
     InputFieldView_DeactivateKeyboard, &HMUI::InputFieldView::DeactivateKeyboard, void, HMUI::InputFieldView* self, HMUI::UIKeyboard* keyboard
 ) {
     InputFieldView_DeactivateKeyboard(self, keyboard);
 
-    auto handler = self->GetComponent<MetaCore::KeyboardCloseHandler*>();
+    auto handler = self->GetComponent<KeyboardCloseHandler*>();
     if (handler && handler->closeCallback)
         handler->closeCallback();
 }
@@ -505,7 +517,7 @@ MAKE_AUTO_HOOK_MATCH(
 // run keyboard ok button callbacks
 MAKE_AUTO_HOOK_MATCH(UIKeyboardManager_HandleKeyboardOkButton, &UIKeyboardManager::HandleKeyboardOkButton, void, UIKeyboardManager* self) {
 
-    auto handler = self->_selectedInput->GetComponent<MetaCore::KeyboardCloseHandler*>();
+    auto handler = self->_selectedInput->GetComponent<KeyboardCloseHandler*>();
     if (handler && handler->okCallback)
         handler->okCallback();
 
