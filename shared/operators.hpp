@@ -43,7 +43,7 @@ CREATE_BINARY_OPERATOR(/, Division)
         return T::op_##name(obj);           \
     }
 
-CREATE_UNARY_OPERATOR(-, Negation)
+CREATE_UNARY_OPERATOR(-, UnaryNegation)
 
 #undef CREATE_UNARY_OPERATOR
 
