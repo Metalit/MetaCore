@@ -77,4 +77,10 @@ namespace MetaCore::Input {
     /// @param mod The unique id of the mod modifying haptic feedback
     /// @param enable If haptic feedback should be enabled for this mod
     void SetHaptics(std::string mod, bool enable);
+    /// @brief Gets if haptic feedback is currently disabled
+    /// @return If haptic feedback is currently disabled
+    bool IsHapticsDisabled();
+    /// @brief Gets all the mods currently disabling haptic feedback
+    /// @return All the mods currently disabling haptic feedback
+    std::set<std::string> const& GetHapticsDisablers();
 }

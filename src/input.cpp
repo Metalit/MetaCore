@@ -29,6 +29,8 @@ static std::vector<OVRInput::Controller> const ControllersMap = {
     OVRInput::Controller::LTouch, OVRInput::Controller::RTouch, OVRInput::Controller::Active, OVRInput::Controller::Touch
 };
 
+static std::set<std::string> hapticsDisablers;
+
 bool MetaCore::Input::GetPressed(Controllers controller, Buttons button) {
     if (button < 0 || button >= ButtonsMap.size() || controller < 0 || controller >= ControllersMap.size())
         return false;
@@ -83,4 +85,19 @@ VRUIControls::VRInputModule* MetaCore::Input::GetCurrentInputModule() {
             Engine::SetOnDisable(input, []() { input = nullptr; }, true);
     }
     return input;
+}
+
+void MetaCore::Input::SetHaptics(std::string mod, bool enable) {
+    if (enable)
+        hapticsDisablers.erase(mod);
+    else
+        hapticsDisablers.emplace(std::move(mod));
+}
+
+bool MetaCore::Input::IsHapticsDisabled() {
+    return !hapticsDisablers.empty();
+}
+
+std::set<std::string> const& MetaCore::Input::GetHapticsDisablers() {
+    return hapticsDisablers;
 }

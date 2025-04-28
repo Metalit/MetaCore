@@ -17,6 +17,7 @@
 #include "GlobalNamespace/NoteController.hpp"
 #include "GlobalNamespace/NoteCutInfo.hpp"
 #include "GlobalNamespace/OVRInput.hpp"
+#include "GlobalNamespace/OculusVRHelper.hpp"
 #include "GlobalNamespace/PartyFreePlayFlowCoordinator.hpp"
 #include "GlobalNamespace/PauseMenuManager.hpp"
 #include "GlobalNamespace/ScoreController.hpp"
@@ -584,6 +585,22 @@ MAKE_AUTO_HOOK_MATCH(
         finishedCallback->Invoke();
     else
         self->StartCoroutine(custom_types::Helpers::CoroutineHelper::New(DelayCallback(finishedCallback, duration)));
+}
+
+// disable haptics if requested
+
+MAKE_AUTO_HOOK_MATCH(
+    OculusVRHelper_TriggerHapticPulse,
+    &OculusVRHelper::TriggerHapticPulse,
+    void,
+    OculusVRHelper* self,
+    UnityEngine::XR::XRNode node,
+    float duration,
+    float strength,
+    float frequency
+) {
+    if (!Input::IsHapticsDisabled())
+        OculusVRHelper_TriggerHapticPulse(self, node, duration, strength, frequency);
 }
 
 // hook abort and provide backtraces
