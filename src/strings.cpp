@@ -1,7 +1,10 @@
 #include "strings.hpp"
 
+#include <filesystem>
+
 std::string MetaCore::Strings::SanitizedPath(std::string const& path) {
     std::string newName;
+    newName.reserve(path.size());
     // just whitelist simple characters
     static auto const okChar = [](unsigned char c) {
         if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'))
@@ -18,6 +21,18 @@ std::string MetaCore::Strings::SanitizedPath(std::string const& path) {
     if (newName == "")
         return "_";
     return newName;
+}
+
+std::string MetaCore::Strings::UniqueFileName(std::string const& file, std::string const& directory) {
+    std::filesystem::path input = file;
+    std::filesystem::path dir = directory;
+    std::string stem = input.stem();
+    std::string extension = input.extension();
+    std::string output = stem + extension;
+    int num = 1;
+    while (std::filesystem::exists(dir / output))
+        output = fmt::format("{}_{}{}", stem, num++, extension);
+    return output;
 }
 
 std::string MetaCore::Strings::SecondsToString(int seconds, bool hours) {
@@ -80,4 +95,11 @@ bool MetaCore::Strings::IEquals(std::string const& a, std::string const& b) {
             return false;
     }
     return true;
+}
+
+std::string MetaCore::Strings::Lower(std::string const& string) {
+    std::string ret;
+    ret.reserve(string.size());
+    std::transform(string.begin(), string.end(), std::back_inserter(ret), tolower);
+    return ret;
 }

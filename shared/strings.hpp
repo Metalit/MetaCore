@@ -9,6 +9,12 @@ namespace MetaCore::Strings {
     /// @return The sanitized path
     std::string SanitizedPath(std::string const& path);
 
+    /// @brief Finds a unique file name for a file by adding _1, _2, etc (before the extension, if present)
+    /// @param file The potentially duplicated filename
+    /// @param directory The directory to search for duplicate files in
+    /// @return The unique file name (without sanitization)
+    std::string UniqueFileName(std::string const& file, std::string const& directory);
+
     /// @brief Converts a number of seconds to a string in the form minutes:seconds
     /// @param seconds The total number of seconds
     /// @param hours If hours should be included in the string as well
@@ -25,6 +31,11 @@ namespace MetaCore::Strings {
     /// @param b The second string to compare
     /// @return If the strings are equal, ignoring case
     bool IEquals(std::string const& a, std::string const& b);
+
+    /// @brief Converts string to lowercase
+    /// @param string The string to convert
+    /// @return The string in lowercase
+    std::string Lower(std::string const& string);
 
     /// @brief Formats a number with a specific number of decimal places
     /// @param value The number to format
