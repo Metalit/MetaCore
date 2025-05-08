@@ -6,6 +6,7 @@
 #include "GlobalNamespace/CutScoreBuffer.hpp"
 #include "GlobalNamespace/FadeInOutController.hpp"
 #include "GlobalNamespace/GameEnergyCounter.hpp"
+#include "GlobalNamespace/GameScenesManager.hpp"
 #include "GlobalNamespace/LevelCompletionResults.hpp"
 #include "GlobalNamespace/LevelCompletionResultsHelper.hpp"
 #include "GlobalNamespace/MenuTransitionsHelper.hpp"
@@ -48,10 +49,6 @@
 
 using namespace GlobalNamespace;
 using namespace MetaCore;
-
-static UnityEngine::Transform* rotationalAnchor = nullptr;
-static bool wasHidden = false;
-static bool initialized = false;
 
 // update score and max score
 MAKE_AUTO_HOOK_MATCH(
@@ -237,12 +234,26 @@ MAKE_AUTO_HOOK_MATCH(
     Events::Broadcast(Events::HealthChanged);
 }
 
-// initialize on level start
+// initialize as soon as the scene is loaded
+MAKE_AUTO_HOOK_MATCH(
+    GameScenesManager_PushScenes_Delegate,
+    &GameScenesManager::__c__DisplayClass40_0::_PushScenes_b__1,
+    void,
+    GameScenesManager::__c__DisplayClass40_0* self,
+    Zenject::DiContainer* container
+) {
+    logger.info("scene loaded");
+    Internals::Initialize();
+    Events::Broadcast(Events::GameplaySceneStarted);
+
+    GameScenesManager_PushScenes_Delegate(self, container);
+}
+
+// broadcast level start
 MAKE_AUTO_HOOK_MATCH(
     AudioTimeSyncController_StartSong, &AudioTimeSyncController::StartSong, void, AudioTimeSyncController* self, float startTimeOffset
 ) {
     logger.info("level start");
-    Internals::Initialize();
     Events::Broadcast(Events::MapStarted);
 
     AudioTimeSyncController_StartSong(self, startTimeOffset);

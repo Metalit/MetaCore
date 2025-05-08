@@ -224,7 +224,7 @@ void Internals::Initialize() {
 
     startingState.prevRotLeft = Quaternion::get_identity();
     startingState.prevRotRight = Quaternion::get_identity();
-    startingState.saberManager = Object::FindObjectOfType<SaberManager*>();
+    startingState.saberManager = Object::FindObjectOfType<SaberManager*>(true);
     startingState.mainCamera = Camera::get_main();
     startingState.modExtraData.clear();
 

@@ -28,7 +28,7 @@ namespace MetaCore::Events {
         MapSelected,
         // After the current map is deselected without a new one being selected
         MapDeselected,
-        // After a new map is started and stats are available
+        // After a new map is fully started
         MapStarted,
         // After a map is paused
         MapPaused,
@@ -42,7 +42,9 @@ namespace MetaCore::Events {
         GameplaySceneEnded,
         // After the score submission status changes
         ScoreSubmission,
-        EventMax = ScoreSubmission,
+        // After the scene has finished transitioning to gameplay and stats are available
+        GameplaySceneStarted,
+        EventMax = GameplaySceneStarted,
     };
 
     /// @brief Registers a custom event for future broadcasts
