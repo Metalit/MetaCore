@@ -1,5 +1,6 @@
 #include "hooks.hpp"
 
+#include "GlobalNamespace/AnnotatedBeatmapLevelCollectionsViewController.hpp"
 #include "GlobalNamespace/AudioTimeSyncController.hpp"
 #include "GlobalNamespace/BeatmapObjectExecutionRatingsRecorder.hpp"
 #include "GlobalNamespace/BeatmapObjectManager.hpp"
@@ -467,24 +468,26 @@ MAKE_AUTO_HOOK_MATCH(
 ) {
     bool ret = PartyFreePlayFlowCoordinator_WillScoreGoToLeaderboard(self, levelCompletionResults, leaderboardId, practice);
     if (Game::IsScoreSubmissionDisabled()) {
-        logger.info("Disabling submission of score");
+        logger.info("disabling submission of score");
         return false;
     }
     return ret;
+}
+
+static void AddSignalUpdates(UnityEngine::Component* self, std::function<void()> disable, std::function<void()> enable) {
+    auto signal = Engine::GetOrAddComponent<ObjectSignal*>(self);
+    signal->onDisable = disable;
+    // although having onEnable will make for duplicate updates most of the time,
+    // it's needed if a submenu such as replay, playlist manager, etc is opened (for when it goes back to the level selection)
+    signal->onEnable = enable;
+    signal->onEnable();
 }
 
 // track level selection
 MAKE_AUTO_HOOK_MATCH(
     StandardLevelDetailView_SetContentForBeatmapData, &StandardLevelDetailView::SetContentForBeatmapData, void, StandardLevelDetailView* self
 ) {
-    Internals::SetLevel(self->beatmapKey, self->_beatmapLevel);
-
-    if (auto signal = self->gameObject->AddComponent<ObjectSignal*>()) {
-        signal->onEnable = [self]() {
-            Internals::SetLevel(self->beatmapKey, self->_beatmapLevel);
-        };
-        signal->onDisable = Internals::ClearLevel;
-    }
+    AddSignalUpdates(self, Internals::ClearLevel, [self]() { Internals::SetLevel(self->beatmapKey, self->_beatmapLevel); });
 
     StandardLevelDetailView_SetContentForBeatmapData(self);
 }
@@ -493,16 +496,39 @@ MAKE_AUTO_HOOK_MATCH(
 MAKE_AUTO_HOOK_MATCH(
     MissionLevelDetailViewController_RefreshContent, &MissionLevelDetailViewController::RefreshContent, void, MissionLevelDetailViewController* self
 ) {
-    auto key = self->missionNode->missionData->beatmapKey;
-    Internals::SetLevel(key, Songs::FindLevel(key));
-
-    auto signal = Engine::GetOrAddComponent<ObjectSignal*>(self);
-    signal->onEnable = [key]() {
+    AddSignalUpdates(self, Internals::ClearLevel, [key = self->missionNode->missionData->beatmapKey]() {
         Internals::SetLevel(key, Songs::FindLevel(key));
-    };
-    signal->onDisable = Internals::ClearLevel;
+    });
 
     MissionLevelDetailViewController_RefreshContent(self);
+}
+
+// track playlist selection
+MAKE_AUTO_HOOK_MATCH(
+    AnnotatedBeatmapLevelCollectionsViewController_HandleDidSelectAnnotatedBeatmapLevelCollection,
+    &AnnotatedBeatmapLevelCollectionsViewController::HandleDidSelectAnnotatedBeatmapLevelCollection,
+    void,
+    AnnotatedBeatmapLevelCollectionsViewController* self,
+    BeatmapLevelPack* pack
+) {
+    AnnotatedBeatmapLevelCollectionsViewController_HandleDidSelectAnnotatedBeatmapLevelCollection(self, pack);
+
+    AddSignalUpdates(self, Internals::ClearPlaylist, [pack]() { Internals::SetPlaylist(pack); });
+}
+
+// track initial playlist selection
+MAKE_AUTO_HOOK_MATCH(
+    AnnotatedBeatmapLevelCollectionsViewController_SetData,
+    &AnnotatedBeatmapLevelCollectionsViewController::SetData,
+    void,
+    AnnotatedBeatmapLevelCollectionsViewController* self,
+    System::Collections::Generic::IReadOnlyList_1<BeatmapLevelPack*>* packs,
+    int selectedItemIndex,
+    bool hideIfOneOrNoPacks
+) {
+    AnnotatedBeatmapLevelCollectionsViewController_SetData(self, packs, selectedItemIndex, hideIfOneOrNoPacks);
+
+    AddSignalUpdates(self, Internals::ClearPlaylist, [pack = packs->get_Item(selectedItemIndex)]() { Internals::SetPlaylist(pack); });
 }
 
 // run input button events

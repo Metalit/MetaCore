@@ -9,6 +9,7 @@
 #include "GlobalNamespace/LevelSelectionFlowCoordinator.hpp"
 #include "GlobalNamespace/LevelSelectionNavigationController.hpp"
 #include "GlobalNamespace/MenuTransitionsHelper.hpp"
+#include "GlobalNamespace/PlayerData.hpp"
 #include "System/Threading/Tasks/Task.hpp"
 #include "System/Threading/Tasks/Task_1.hpp"
 #include "game.hpp"
@@ -103,11 +104,44 @@ BeatmapLevel* MetaCore::Songs::FindLevel(BeatmapKey beatmap) {
 }
 
 BeatmapKey MetaCore::Songs::GetSelectedKey(bool last) {
+    if (!last && !Internals::isLevelSelected)
+        return {};
     return Internals::selectedKey;
 }
 
 BeatmapLevel* MetaCore::Songs::GetSelectedLevel(bool last) {
+    if (!last && !Internals::isLevelSelected)
+        return nullptr;
     return Internals::selectedLevel;
+}
+
+BeatmapLevelPack* MetaCore::Songs::GetSelectedPlaylist(bool last) {
+    if (!last && !Internals::isPlaylistSelected)
+        return nullptr;
+    return Internals::selectedPlaylist;
+}
+
+void MetaCore::Songs::SelectLevel(BeatmapLevel* level, BeatmapLevelPack* playlist) {
+    auto main = Game::GetMainFlowCoordinator();
+    main->DismissChildFlowCoordinatorsRecursively(true);
+
+    auto state = LevelSelectionFlowCoordinator::State::New_ctor(playlist, level);
+    state->levelCategory.hasValue = true;
+    if (playlist)
+        state->levelCategory.value = playlist->packID.starts_with("custom_levelPack_") ? SelectLevelCategoryViewController::LevelCategory::CustomSongs
+                                                                                       : SelectLevelCategoryViewController::LevelCategory::MusicPacks;
+    else
+        state->levelCategory.value = SelectLevelCategoryViewController::LevelCategory::All;
+
+    main->_soloFreePlayFlowCoordinator->Setup(state);
+    main->PresentFlowCoordinator(main->_soloFreePlayFlowCoordinator, nullptr, HMUI::ViewController::AnimationDirection::Horizontal, true, false);
+}
+
+void MetaCore::Songs::SelectLevel(BeatmapKey level, BeatmapLevelPack* playlist) {
+    auto main = Game::GetMainFlowCoordinator();
+    main->_playerDataModel->playerData->SetLastSelectedBeatmapCharacteristic(level.beatmapCharacteristic);
+    main->_playerDataModel->playerData->SetLastSelectedBeatmapDifficulty(level.difficulty);
+    SelectLevel(FindLevel(level), playlist);
 }
 
 void MetaCore::Songs::PlayLevelPreview(BeatmapLevel* beatmap) {

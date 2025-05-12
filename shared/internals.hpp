@@ -87,10 +87,14 @@ namespace MetaCore::Internals {
 
     extern GlobalNamespace::BeatmapKey selectedKey;
     extern GlobalNamespace::BeatmapLevel* selectedLevel;
+    extern GlobalNamespace::BeatmapLevelPack* selectedPlaylist;
     extern bool isLevelSelected;
+    extern bool isPlaylistSelected;
 
     void SetLevel(GlobalNamespace::BeatmapKey key, GlobalNamespace::BeatmapLevel* level);
     void ClearLevel();
+    void SetPlaylist(GlobalNamespace::BeatmapLevelPack* playlist);
+    void ClearPlaylist();
 
     void SetEndDragUI(UnityEngine::Component* component, std::function<void()> callback);
     std::function<void()> SetKeyboardCloseUI(UnityEngine::Component* component, std::function<void()> onClosed, std::function<void()> onOk);

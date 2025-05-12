@@ -47,6 +47,19 @@ namespace MetaCore::Songs {
     /// @param last If the last selected beatmap should be returned even if the detail view has been closed
     /// @return The currently selected beatmap level, or nullptr if none
     GlobalNamespace::BeatmapLevel* GetSelectedLevel(bool last = true);
+    /// @brief Gets the currently selected playlist, either OST or custom
+    /// @param last If the last selected playlist should be returned even if none is currently selected
+    /// @return The currently selected playlist, or nullptr if none
+    GlobalNamespace::BeatmapLevelPack* GetSelectedPlaylist(bool last = true);
+
+    /// @brief Navigates to and selects a given beatmap level in the single player level selection, optionally in a playlist
+    /// @param level The level to select, will not select anything if nullptr or not in the playlist
+    /// @param playlist The playlist to select, will open the "All Songs" menu if nullptr
+    void SelectLevel(GlobalNamespace::BeatmapLevel* level, GlobalNamespace::BeatmapLevelPack* playlist = nullptr);
+    /// @brief Navigates to and selects a given beatmap level and difficulty in the single player level selection, optionally in a playlist
+    /// @param key The level, characteristic, and difficulty to select, will not select anything if nullptr or not in the playlist
+    /// @param playlist The playlist to select, will open the "All Songs" menu if nullptr
+    void SelectLevel(GlobalNamespace::BeatmapKey key, GlobalNamespace::BeatmapLevelPack* playlist = nullptr);
 
     /// @brief Plays the preview audio of a level
     /// @param beatmap The level to play the preview of

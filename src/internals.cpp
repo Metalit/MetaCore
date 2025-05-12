@@ -264,33 +264,47 @@ void Internals::Finish(bool quit) {
 
 BeatmapKey Internals::selectedKey = {};
 BeatmapLevel* Internals::selectedLevel = nullptr;
+BeatmapLevelPack* Internals::selectedPlaylist = nullptr;
 bool Internals::isLevelSelected = false;
+bool Internals::isPlaylistSelected = false;
 
 void Internals::SetLevel(BeatmapKey key, BeatmapLevel* level) {
-    logger.debug("set level");
+    logger.debug("set level {}", level ? level->songName : "none");
     if (!level || !key.IsValid()) {
         ClearLevel();
         return;
     }
-    if (level == selectedLevel && key.Equals(selectedKey)) {
-        if (!isLevelSelected) {
-            isLevelSelected = true;
-            logger.debug("broadcast");
-            Events::Broadcast(Events::MapSelected);
-        }
+    if (isLevelSelected && level == selectedLevel && key.Equals(selectedKey))
         return;
-    }
     selectedKey = key;
     selectedLevel = level;
     isLevelSelected = true;
-    logger.debug("broadcast");
     Events::Broadcast(Events::MapSelected);
 }
 
 void Internals::ClearLevel() {
+    logger.debug("clear level");
     isLevelSelected = false;
-    logger.debug("broadcast deselect");
     Events::Broadcast(Events::MapDeselected);
+}
+
+void Internals::SetPlaylist(BeatmapLevelPack* playlist) {
+    logger.debug("set playlist {}", playlist ? playlist->packName : "none");
+    if (!playlist) {
+        ClearLevel();
+        return;
+    }
+    if (isPlaylistSelected && playlist == selectedPlaylist)
+        return;
+    selectedPlaylist = playlist;
+    isPlaylistSelected = true;
+    Events::Broadcast(Events::PlaylistSelected);
+}
+
+void Internals::ClearPlaylist() {
+    logger.debug("clear playlist");
+    isPlaylistSelected = false;
+    Events::Broadcast(Events::PlaylistDeselected);
 }
 
 void Internals::SetEndDragUI(Component* component, std::function<void()> callback) {

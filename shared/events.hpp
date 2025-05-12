@@ -24,7 +24,7 @@ namespace MetaCore::Events {
         Update,
         // 4 times per second, unless the framerate is somehow lower
         SlowUpdate,
-        // After a new map or difficulty is selected in the menu
+        // After a new map or difficulty is selected in the menu (may be called multiple times)
         MapSelected,
         // After the current map is deselected without a new one being selected
         MapDeselected,
@@ -44,7 +44,11 @@ namespace MetaCore::Events {
         ScoreSubmission,
         // After the scene has finished transitioning to gameplay and stats are available
         GameplaySceneStarted,
-        EventMax = GameplaySceneStarted,
+        // After a new playlist is selected in the menu (may be called multiple times)
+        PlaylistSelected,
+        // After the current playlist is deselected without a new one being selected
+        PlaylistDeselected,
+        EventMax = PlaylistDeselected,
     };
 
     /// @brief Registers a custom event for future broadcasts
