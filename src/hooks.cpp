@@ -51,6 +51,29 @@
 using namespace GlobalNamespace;
 using namespace MetaCore;
 
+static bool inGameplayScene = false;
+
+static bool IsGameplayScene(UnityW<ScenesTransitionSetupDataSO> scene) {
+    return scene && scene.try_cast<LevelScenesTransitionSetupDataSO>();
+}
+
+static void CheckInitialize(UnityW<ScenesTransitionSetupDataSO> scene) {
+    if (!IsGameplayScene(scene))
+        return;
+    logger.debug("gameplay scene start");
+    Internals::Initialize();
+    Events::Broadcast(Events::GameplaySceneStarted);
+    inGameplayScene = true;
+}
+
+static void CheckFinish() {
+    if (!inGameplayScene)
+        return;
+    logger.debug("gameplay scene finish");
+    Events::Broadcast(Events::GameplaySceneEnded);
+    inGameplayScene = false;
+}
+
 // update score and max score
 MAKE_AUTO_HOOK_MATCH(
     ScoreController_DespawnScoringElement, &ScoreController::DespawnScoringElement, void, ScoreController* self, ScoringElement* scoringElement
@@ -243,11 +266,22 @@ MAKE_AUTO_HOOK_MATCH(
     GameScenesManager::__c__DisplayClass40_0* self,
     Zenject::DiContainer* container
 ) {
-    logger.info("scene loaded");
-    Internals::Initialize();
-    Events::Broadcast(Events::GameplaySceneStarted);
+    CheckInitialize(self->scenesTransitionSetupData);
 
     GameScenesManager_PushScenes_Delegate(self, container);
+}
+
+// initialize on level restarts as well
+MAKE_AUTO_HOOK_MATCH(
+    GameScenesManager_ReplaceScenes_Delegate_AfterLoad,
+    &GameScenesManager::__c__DisplayClass42_0::_ReplaceScenes_b__2,
+    void,
+    GameScenesManager::__c__DisplayClass42_0* self,
+    Zenject::DiContainer* container
+) {
+    CheckInitialize(self->scenesTransitionSetupData);
+
+    GameScenesManager_ReplaceScenes_Delegate_AfterLoad(self, container);
 }
 
 // broadcast level start
@@ -331,19 +365,6 @@ MAKE_AUTO_HOOK_MATCH(
     MenuTransitionsHelper_HandleMainGameSceneDidFinish(self, standardLevelScenesTransitionSetupData, levelCompletionResults);
 }
 
-// PopScenes delegate for the previous hook
-MAKE_AUTO_HOOK_MATCH(
-    MenuTransitionsHelper_HandleMainGameSceneDidFinish_Delegate,
-    &MenuTransitionsHelper::__c__DisplayClass32_0::_HandleMainGameSceneDidFinish_b__0,
-    void,
-    MenuTransitionsHelper::__c__DisplayClass32_0* self,
-    Zenject::DiContainer* container
-) {
-    MenuTransitionsHelper_HandleMainGameSceneDidFinish_Delegate(self, container);
-
-    Events::Broadcast(Events::GameplaySceneEnded);
-}
-
 // handle campaign level end and restart
 MAKE_AUTO_HOOK_MATCH(
     MenuTransitionsHelper_HandleMissionLevelSceneDidFinish,
@@ -365,19 +386,6 @@ MAKE_AUTO_HOOK_MATCH(
     MenuTransitionsHelper_HandleMissionLevelSceneDidFinish(self, missionLevelScenesTransitionSetupData, missionCompletionResults);
 }
 
-// PopScenes delegate for the previous hook
-MAKE_AUTO_HOOK_MATCH(
-    MenuTransitionsHelper_HandleMissionLevelSceneDidFinish_Delegate,
-    &MenuTransitionsHelper::__c__DisplayClass35_0::_HandleMissionLevelSceneDidFinish_b__0,
-    void,
-    MenuTransitionsHelper::__c__DisplayClass35_0* self,
-    Zenject::DiContainer* container
-) {
-    MenuTransitionsHelper_HandleMissionLevelSceneDidFinish_Delegate(self, container);
-
-    Events::Broadcast(Events::GameplaySceneEnded);
-}
-
 // handle multiplayer level end
 MAKE_AUTO_HOOK_MATCH(
     MenuTransitionsHelper_HandleMultiplayerLevelDidFinish,
@@ -392,19 +400,6 @@ MAKE_AUTO_HOOK_MATCH(
     Events::Broadcast(Events::MapEnded);
 
     MenuTransitionsHelper_HandleMultiplayerLevelDidFinish(self, multiplayerLevelScenesTransitionSetupData, multiplayerResultsData);
-}
-
-// PopScenes delegate for the previous hook
-MAKE_AUTO_HOOK_MATCH(
-    MenuTransitionsHelper_HandleMultiplayerLevelDidFinish_Delegate,
-    &MenuTransitionsHelper::__c__DisplayClass33_0::_HandleMultiplayerLevelDidFinish_b__0,
-    void,
-    MenuTransitionsHelper::__c__DisplayClass33_0* self,
-    Zenject::DiContainer* container
-) {
-    MenuTransitionsHelper_HandleMultiplayerLevelDidFinish_Delegate(self, container);
-
-    Events::Broadcast(Events::GameplaySceneEnded);
 }
 
 // handle multiplayer level end by disconnect
@@ -423,17 +418,30 @@ MAKE_AUTO_HOOK_MATCH(
     MenuTransitionsHelper_HandleMultiplayerLevelDidDisconnect(self, multiplayerLevelScenesTransitionSetupData, disconnectedReason);
 }
 
-// PopScenes delegate for the previous hook
+// track when gameplay scenes are removed
 MAKE_AUTO_HOOK_MATCH(
-    MenuTransitionsHelper_HandleMultiplayerLevelDidDisconnect_Delegate,
-    &MenuTransitionsHelper::__c__DisplayClass34_0::_HandleMultiplayerLevelDidDisconnect_b__0,
+    GameScenesManager_PopScenes_Delegate,
+    &GameScenesManager::__c__DisplayClass41_0::_PopScenes_b__0,
     void,
-    MenuTransitionsHelper::__c__DisplayClass34_0* self,
+    GameScenesManager::__c__DisplayClass41_0* self,
     Zenject::DiContainer* container
 ) {
-    MenuTransitionsHelper_HandleMultiplayerLevelDidDisconnect_Delegate(self, container);
+    CheckFinish();
 
-    Events::Broadcast(Events::GameplaySceneEnded);
+    GameScenesManager_PopScenes_Delegate(self, container);
+}
+
+// track when gameplay scenes are replaced for level restarts
+MAKE_AUTO_HOOK_MATCH(
+    GameScenesManager_ReplaceScenes_Delegate_AfterUnload,
+    &GameScenesManager::__c__DisplayClass42_0::_ReplaceScenes_b__0,
+    void,
+    GameScenesManager::__c__DisplayClass42_0* self,
+    Zenject::DiContainer* container
+) {
+    CheckFinish();
+
+    GameScenesManager_ReplaceScenes_Delegate_AfterUnload(self, container);
 }
 
 // prevent score submission in solo and multiplayer mode

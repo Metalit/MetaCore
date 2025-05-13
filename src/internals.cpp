@@ -238,7 +238,7 @@ void Internals::DoSlowUpdate() {
 
     timeSinceSlowUpdate += Time::get_deltaTime();
     if (timeSinceSlowUpdate > 1 / (float) SLOW_UPDATES_PER_SEC) {
-        if (auto saberManager = currentState.saberManager) {
+        if (auto saberManager = currentState.saberManager; saberManager && saberManager->leftSaber && saberManager->rightSaber) {
             currentState.leftSpeeds.emplace_back(saberManager->leftSaber->bladeSpeed);
             currentState.rightSpeeds.emplace_back(saberManager->rightSaber->bladeSpeed);
 
