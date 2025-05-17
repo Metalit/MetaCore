@@ -1,4 +1,5 @@
 {
+  "$schema": "https://raw.githubusercontent.com/QuestPackageManager/QPM.Package/refs/heads/main/qpm.shared.schema.json",
   "config": {
     "version": "0.1.0",
     "sharedDir": "shared",
@@ -46,7 +47,7 @@
     "dependencies": [
       {
         "id": "beatsaber-hook",
-        "versionRange": "^6.4.0",
+        "versionRange": "^6.4.1",
         "additionalData": {}
       },
       {
@@ -58,12 +59,12 @@
       },
       {
         "id": "bs-cordl",
-        "versionRange": "^4004.0.0",
+        "versionRange": "4005.*",
         "additionalData": {}
       },
       {
         "id": "paper2_scotland2",
-        "versionRange": "^4.5.0",
+        "versionRange": "^4.6.4",
         "additionalData": {}
       },
       {
@@ -97,52 +98,6 @@
   "restoredDependencies": [
     {
       "dependency": {
-        "id": "rapidjson-macros",
-        "versionRange": "=2.1.0",
-        "additionalData": {
-          "headersOnly": true,
-          "branchName": "version/v2_1_0",
-          "cmake": false
-        }
-      },
-      "version": "2.1.0"
-    },
-    {
-      "dependency": {
-        "id": "paper2_scotland2",
-        "versionRange": "=4.6.1",
-        "additionalData": {
-          "soLink": "https://github.com/Fernthedev/paperlog/releases/download/v4.6.1/libpaper2_scotland2.so",
-          "overrideSoName": "libpaper2_scotland2.so",
-          "modLink": "https://github.com/Fernthedev/paperlog/releases/download/v4.6.1/paper2_scotland2.qmod",
-          "branchName": "version/v4_6_1",
-          "compileOptions": {
-            "systemIncludes": [
-              "shared/utfcpp/source"
-            ]
-          },
-          "cmake": false
-        }
-      },
-      "version": "4.6.1"
-    },
-    {
-      "dependency": {
-        "id": "web-utils",
-        "versionRange": "=0.6.7",
-        "additionalData": {
-          "soLink": "https://github.com/RedBrumbler/WebUtils/releases/download/v0.6.7/libweb-utils.so",
-          "debugSoLink": "https://github.com/RedBrumbler/WebUtils/releases/download/v0.6.7/debug_libweb-utils.so",
-          "overrideSoName": "libweb-utils.so",
-          "modLink": "https://github.com/RedBrumbler/WebUtils/releases/download/v0.6.7/WebUtils.qmod",
-          "branchName": "version/v0_6_7",
-          "cmake": false
-        }
-      },
-      "version": "0.6.7"
-    },
-    {
-      "dependency": {
         "id": "custom-types",
         "versionRange": "=0.18.2",
         "additionalData": {
@@ -163,27 +118,23 @@
     },
     {
       "dependency": {
-        "id": "libil2cpp",
-        "versionRange": "=0.4.0",
+        "id": "rapidjson-macros",
+        "versionRange": "=2.1.0",
         "additionalData": {
           "headersOnly": true,
-          "compileOptions": {
-            "systemIncludes": [
-              "il2cpp/external/baselib/Include",
-              "il2cpp/external/baselib/Platforms/Android/Include"
-            ]
-          }
+          "branchName": "version/v2_1_0",
+          "cmake": false
         }
       },
-      "version": "0.4.0"
+      "version": "2.1.0"
     },
     {
       "dependency": {
         "id": "bs-cordl",
-        "versionRange": "=4004.0.0",
+        "versionRange": "=4005.0.0",
         "additionalData": {
           "headersOnly": true,
-          "branchName": "version/v4004_0_0",
+          "branchName": "version/v4005_0_0",
           "compileOptions": {
             "includePaths": [
               "include"
@@ -199,7 +150,45 @@
           }
         }
       },
-      "version": "4004.0.0"
+      "version": "4005.0.0"
+    },
+    {
+      "dependency": {
+        "id": "paper2_scotland2",
+        "versionRange": "=4.6.4",
+        "additionalData": {
+          "soLink": "https://github.com/Fernthedev/paperlog/releases/download/v4.6.4/libpaper2_scotland2.so",
+          "overrideSoName": "libpaper2_scotland2.so",
+          "modLink": "https://github.com/Fernthedev/paperlog/releases/download/v4.6.4/paper2_scotland2.qmod",
+          "branchName": "version/v4_6_4",
+          "compileOptions": {
+            "systemIncludes": [
+              "shared/utfcpp/source"
+            ]
+          },
+          "cmake": false
+        }
+      },
+      "version": "4.6.4"
+    },
+    {
+      "dependency": {
+        "id": "fmt",
+        "versionRange": "=11.0.2",
+        "additionalData": {
+          "headersOnly": true,
+          "branchName": "version/v11_0_2",
+          "compileOptions": {
+            "systemIncludes": [
+              "fmt/include/"
+            ],
+            "cppFlags": [
+              "-DFMT_HEADER_ONLY"
+            ]
+          }
+        }
+      },
+      "version": "11.0.2"
     },
     {
       "dependency": {
@@ -215,6 +204,21 @@
         }
       },
       "version": "6.4.1"
+    },
+    {
+      "dependency": {
+        "id": "web-utils",
+        "versionRange": "=0.6.7",
+        "additionalData": {
+          "soLink": "https://github.com/RedBrumbler/WebUtils/releases/download/v0.6.7/libweb-utils.so",
+          "debugSoLink": "https://github.com/RedBrumbler/WebUtils/releases/download/v0.6.7/debug_libweb-utils.so",
+          "overrideSoName": "libweb-utils.so",
+          "modLink": "https://github.com/RedBrumbler/WebUtils/releases/download/v0.6.7/WebUtils.qmod",
+          "branchName": "version/v0_6_7",
+          "cmake": false
+        }
+      },
+      "version": "0.6.7"
     },
     {
       "dependency": {
@@ -246,22 +250,19 @@
     },
     {
       "dependency": {
-        "id": "fmt",
-        "versionRange": "=11.0.2",
+        "id": "libil2cpp",
+        "versionRange": "=0.4.0",
         "additionalData": {
           "headersOnly": true,
-          "branchName": "version/v11_0_2",
           "compileOptions": {
             "systemIncludes": [
-              "fmt/include/"
-            ],
-            "cppFlags": [
-              "-DFMT_HEADER_ONLY"
+              "il2cpp/external/baselib/Include",
+              "il2cpp/external/baselib/Platforms/Android/Include"
             ]
           }
         }
       },
-      "version": "11.0.2"
+      "version": "0.4.0"
     }
   ]
 }
