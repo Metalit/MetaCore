@@ -1,7 +1,6 @@
 #include "internals.hpp"
 
 #include "GlobalNamespace/AudioTimeSyncController.hpp"
-#include "GlobalNamespace/BeatmapCallbacksController.hpp"
 #include "GlobalNamespace/BeatmapCallbacksUpdater.hpp"
 #include "GlobalNamespace/BeatmapDataSortedListForTypeAndIds_1.hpp"
 #include "GlobalNamespace/GameplayCoreInstaller.hpp"
@@ -15,7 +14,6 @@
 #include "GlobalNamespace/PlayerDataModel.hpp"
 #include "GlobalNamespace/PlayerLevelStatsData.hpp"
 #include "GlobalNamespace/Saber.hpp"
-#include "GlobalNamespace/ScoreController.hpp"
 #include "GlobalNamespace/ScoreModel.hpp"
 #include "System/Collections/Generic/Dictionary_2.hpp"
 #include "System/Collections/Generic/LinkedList_1.hpp"
@@ -24,6 +22,7 @@
 #include "UnityEngine/Resources.hpp"
 #include "UnityEngine/Time.hpp"
 #include "UnityEngine/Transform.hpp"
+#include "delegates.hpp"
 #include "events.hpp"
 #include "main.hpp"
 #include "stats.hpp"
@@ -80,6 +79,12 @@ static float GetSongLength(ScoreController* controller) {
     return controller->_audioTimeSyncController->_initData->audioClip->length;
 }
 
+static float GetSongSpeed(ScoreController* controller) {
+    if (!controller)
+        return 1;
+    return controller->_audioTimeSyncController->_initData->timeScale;
+}
+
 static int GetFailCount(PlayerDataModel* data) {
     if (!data)
         return 0;
@@ -116,10 +121,10 @@ static float GetNegativeMods(ScoreController* controller) {
     return ret;
 }
 
-static int GetHighScore(PlayerDataModel* data, GameplayCoreInstaller* installer) {
-    if (!data || !installer || !installer->_sceneSetupData)
+static int GetHighScore(PlayerDataModel* data, GameplayCoreSceneSetupData* setupData) {
+    if (!data || !setupData)
         return -1;
-    auto beatmap = installer->_sceneSetupData->beatmapKey;
+    auto beatmap = setupData->beatmapKey;
     if (!data->playerData->levelsStatsData->ContainsKey(beatmap))
         return -1;
     return data->playerData->levelsStatsData->get_Item(beatmap)->highScore;
@@ -131,6 +136,17 @@ static float GetHealth(ScoreController* controller) {
     return controller->_gameEnergyCounter->energy;
 }
 
+static GameplayCoreSceneSetupData* FindSceneSetupData() {
+    auto gameplayCoreInstallers = Resources::FindObjectsOfTypeAll<GameplayCoreInstaller*>();
+    for (auto& installer : gameplayCoreInstallers) {
+        if (installer->isActiveAndEnabled && installer->_sceneSetupData != nullptr)
+            return installer->_sceneSetupData;
+    }
+    if (auto installer = gameplayCoreInstallers->FirstOrDefault())
+        return installer->_sceneSetupData;
+    return nullptr;
+}
+
 int Internals::leftScore;
 int Internals::rightScore;
 int Internals::leftMaxScore;
@@ -139,9 +155,15 @@ int Internals::songMaxScore;
 int Internals::leftCombo;
 int Internals::rightCombo;
 int Internals::combo;
+int Internals::highestLeftCombo;
+int Internals::highestRightCombo;
+int Internals::highestCombo;
+int Internals::multiplier;
+int Internals::multiplierProgress;
 float Internals::health;
 float Internals::songTime;
 float Internals::songLength;
+float Internals::songSpeed;
 int Internals::notesLeftCut;
 int Internals::notesRightCut;
 int Internals::notesLeftBadCut;
@@ -168,45 +190,70 @@ std::vector<float> Internals::rightSpeeds;
 std::vector<float> Internals::leftAngles;
 std::vector<float> Internals::rightAngles;
 bool Internals::noFail;
-GlobalNamespace::GameplayModifiers* Internals::modifiers;
 float Internals::positiveMods;
 float Internals::negativeMods;
 int Internals::personalBest;
 int Internals::fails;
 int Internals::restarts;
-GlobalNamespace::ColorScheme* Internals::colors;
-GlobalNamespace::BeatmapLevel* Internals::beatmapLevel;
-GlobalNamespace::BeatmapKey Internals::beatmapKey;
-GlobalNamespace::BeatmapData* Internals::beatmapData;
-GlobalNamespace::EnvironmentInfoSO* Internals::environment;
 int Internals::leftMissedMaxScore;
 int Internals::rightMissedMaxScore;
 int Internals::leftMissedFixedScore;
 int Internals::rightMissedFixedScore;
-UnityEngine::Quaternion Internals::prevRotLeft;
-UnityEngine::Quaternion Internals::prevRotRight;
-GlobalNamespace::SaberManager* Internals::saberManager;
-UnityEngine::Camera* Internals::mainCamera;
+Quaternion Internals::prevRotLeft;
+Quaternion Internals::prevRotRight;
+
+GameplayModifiers* Internals::modifiers;
+ColorScheme* Internals::colors;
+BeatmapLevel* Internals::beatmapLevel;
+BeatmapKey Internals::beatmapKey;
+BeatmapData* Internals::beatmapData;
+EnvironmentInfoSO* Internals::environment;
+AudioTimeSyncController* Internals::audioTimeSyncController;
+BeatmapCallbacksController* Internals::beatmapCallbacksController;
+BeatmapObjectManager* Internals::beatmapObjectManager;
+ComboController* Internals::comboController;
+GameEnergyCounter* Internals::gameEnergyCounter;
+ScoreController* Internals::scoreController;
+SaberManager* Internals::saberManager;
+Camera* Internals::mainCamera;
 
 bool Internals::stateValid = false;
+bool Internals::referencesValid = false;
 bool Internals::mapWasQuit = false;
 
 void Internals::Initialize() {
     auto beatmapCallbacksUpdater = Object::FindObjectOfType<BeatmapCallbacksUpdater*>(true);
-    auto scoreController = Object::FindObjectOfType<ScoreController*>(true);
     auto playerDataModel = Object::FindObjectOfType<PlayerDataModel*>(true);
 
-    auto gameplayCoreInstallers = Resources::FindObjectsOfTypeAll<GameplayCoreInstaller*>();
-    GameplayCoreInstaller* gameplayCoreInstaller;
-    for (auto& installer : gameplayCoreInstallers) {
-        if (installer->isActiveAndEnabled && installer->_sceneSetupData != nullptr) {
-            gameplayCoreInstaller = installer;
-            break;
-        }
-    }
-    if (!gameplayCoreInstaller)
-        gameplayCoreInstaller = gameplayCoreInstallers->FirstOrDefault();
-    auto setupData = gameplayCoreInstaller ? gameplayCoreInstaller->_sceneSetupData : nullptr;
+    auto setupData = FindSceneSetupData();
+
+    // out of order since we use it
+    scoreController = Object::FindObjectOfType<ScoreController*>(true);
+
+    modifiers = scoreController ? scoreController->_gameplayModifiers : nullptr;
+
+    colors = setupData ? setupData->colorScheme : nullptr;
+    beatmapLevel = setupData ? setupData->beatmapLevel : nullptr;
+    beatmapKey = setupData ? setupData->beatmapKey : BeatmapKey();
+    beatmapData = beatmapCallbacksUpdater ? (BeatmapData*) beatmapCallbacksUpdater->_beatmapCallbacksController->_beatmapData : nullptr;
+    environment = setupData ? setupData->targetEnvironmentInfo : nullptr;
+
+    audioTimeSyncController = scoreController ? scoreController->_audioTimeSyncController : nullptr;
+    beatmapCallbacksController = beatmapCallbacksUpdater ? beatmapCallbacksUpdater->_beatmapCallbacksController : nullptr;
+    beatmapObjectManager = scoreController ? scoreController->_beatmapObjectManager : nullptr;
+    comboController = Object::FindObjectOfType<ComboController*>(true);
+    saberManager = Object::FindObjectOfType<SaberManager*>(true);
+    mainCamera = Camera::get_main();
+
+    referencesValid = setupData && scoreController && beatmapCallbacksUpdater && comboController && saberManager && mainCamera;
+
+    if (scoreController)
+        scoreController->add_multiplierDidChangeEvent(Delegates::MakeSystemAction([](int mult, float normalizedProgress) {
+            if (!stateValid)
+                return;
+            multiplier = mult;
+            multiplierProgress = normalizedProgress * mult * 2;
+        }));
 
     leftScore = 0;
     rightScore = 0;
@@ -216,9 +263,15 @@ void Internals::Initialize() {
     leftCombo = 0;
     rightCombo = 0;
     combo = 0;
+    highestLeftCombo = 0;
+    highestRightCombo = 0;
+    highestCombo = 0;
+    multiplier = 1;
+    multiplierProgress = 0;
     health = GetHealth(scoreController);
     songTime = 0;
     songLength = GetSongLength(scoreController);
+    songSpeed = GetSongSpeed(scoreController);
     notesLeftCut = 0;
     notesRightCut = 0;
     notesLeftBadCut = 0;
@@ -247,11 +300,10 @@ void Internals::Initialize() {
     leftAngles = {};
     rightAngles = {};
     noFail = false;
-    modifiers = scoreController ? scoreController->_gameplayModifiers : nullptr;
     // GetNegativeMods sets noFail
     positiveMods = GetPositiveMods(scoreController);
     negativeMods = GetNegativeMods(scoreController);
-    personalBest = GetHighScore(playerDataModel, gameplayCoreInstaller);
+    personalBest = GetHighScore(playerDataModel, setupData);
     fails = GetFailCount(playerDataModel);
 
     logger.debug("modifiers {} -{}", positiveMods, negativeMods);
@@ -266,12 +318,6 @@ void Internals::Initialize() {
     lastBeatmap = beatmap;
     timeSinceSlowUpdate = 0;
 
-    colors = setupData ? setupData->colorScheme : nullptr;
-    beatmapLevel = setupData ? setupData->beatmapLevel : nullptr;
-    beatmapKey = setupData ? setupData->beatmapKey : BeatmapKey();
-    beatmapData = beatmapCallbacksUpdater ? (BeatmapData*) beatmapCallbacksUpdater->_beatmapCallbacksController->_beatmapData : nullptr;
-    environment = setupData ? setupData->targetEnvironmentInfo : nullptr;
-
     leftMissedMaxScore = 0;
     rightMissedMaxScore = 0;
     leftMissedFixedScore = 0;
@@ -279,8 +325,6 @@ void Internals::Initialize() {
 
     prevRotLeft = Quaternion::get_identity();
     prevRotRight = Quaternion::get_identity();
-    saberManager = Object::FindObjectOfType<SaberManager*>(true);
-    mainCamera = Camera::get_main();
 
     stateValid = true;
 }
@@ -312,6 +356,7 @@ void Internals::DoSlowUpdate() {
 
 void Internals::Finish(bool quit) {
     stateValid = false;
+    referencesValid = false;
     mapWasQuit = quit;
 }
 

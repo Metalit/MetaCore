@@ -7,9 +7,9 @@ namespace MetaCore::Stats {
     /// @param data The note data
     /// @return If the note is fake
     bool IsFakeNote(GlobalNamespace::NoteData* data);
-    /// @brief Checks if a note should be counted in calculations involving swing parts
+    /// @brief Checks if a note should be counted in calculations involving swing parts or note count
     /// @param data The note data
-    /// @return If the note is fake
+    /// @return If the note should be counted
     bool ShouldCountNote(GlobalNamespace::NoteData* data);
 
     constexpr int LeftSaber = 0;
@@ -22,12 +22,16 @@ namespace MetaCore::Stats {
     int GetMaxScore(int saber);
     int GetSongMaxScore();
     int GetCombo(int saber);
+    int GetHighestCombo(int saber);
     bool GetFullCombo(int saber);
     int GetMultiplier();
     float GetMultiplierProgress(bool allLevels);
+    int GetMaxMultiplier();
+    float GetMaxMultiplierProgress(bool allLevels);
     float GetHealth();
     float GetSongTime();
     float GetSongLength();
+    float GetSongSpeed();
     int GetTotalNotes(int saber);
     int GetNotesCut(int saber);
     int GetNotesMissed(int saber);

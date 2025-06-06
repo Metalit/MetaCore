@@ -1,15 +1,18 @@
 #pragma once
 
-#include <any>
-
+#include "GlobalNamespace/BeatmapCallbacksController.hpp"
 #include "GlobalNamespace/BeatmapData.hpp"
 #include "GlobalNamespace/BeatmapKey.hpp"
 #include "GlobalNamespace/BeatmapLevel.hpp"
 #include "GlobalNamespace/BeatmapLevelPack.hpp"
+#include "GlobalNamespace/BeatmapObjectManager.hpp"
 #include "GlobalNamespace/ColorScheme.hpp"
+#include "GlobalNamespace/ComboController.hpp"
 #include "GlobalNamespace/EnvironmentInfoSO.hpp"
+#include "GlobalNamespace/GameEnergyCounter.hpp"
 #include "GlobalNamespace/GameplayModifiers.hpp"
 #include "GlobalNamespace/SaberManager.hpp"
+#include "GlobalNamespace/ScoreController.hpp"
 #include "UnityEngine/Camera.hpp"
 #include "UnityEngine/Quaternion.hpp"
 
@@ -24,9 +27,15 @@ namespace MetaCore::Internals {
     extern int leftCombo;
     extern int rightCombo;
     extern int combo;
+    extern int highestLeftCombo;
+    extern int highestRightCombo;
+    extern int highestCombo;
+    extern int multiplier;
+    extern int multiplierProgress;
     extern float health;
     extern float songTime;
     extern float songLength;
+    extern float songSpeed;
     extern int notesLeftCut;
     extern int notesRightCut;
     extern int notesLeftBadCut;
@@ -53,27 +62,36 @@ namespace MetaCore::Internals {
     extern std::vector<float> leftAngles;
     extern std::vector<float> rightAngles;
     extern bool noFail;
-    extern GlobalNamespace::GameplayModifiers* modifiers;
     extern float positiveMods;
     extern float negativeMods;
     extern int personalBest;
     extern int fails;
     extern int restarts;
-    extern GlobalNamespace::ColorScheme* colors;
-    extern GlobalNamespace::BeatmapLevel* beatmapLevel;
-    extern GlobalNamespace::BeatmapKey beatmapKey;
-    extern GlobalNamespace::BeatmapData* beatmapData;
-    extern GlobalNamespace::EnvironmentInfoSO* environment;
     extern int leftMissedMaxScore;
     extern int rightMissedMaxScore;
     extern int leftMissedFixedScore;
     extern int rightMissedFixedScore;
     extern UnityEngine::Quaternion prevRotLeft;
     extern UnityEngine::Quaternion prevRotRight;
+
+    // references
+    extern GlobalNamespace::GameplayModifiers* modifiers;
+    extern GlobalNamespace::ColorScheme* colors;
+    extern GlobalNamespace::BeatmapLevel* beatmapLevel;
+    extern GlobalNamespace::BeatmapKey beatmapKey;
+    extern GlobalNamespace::BeatmapData* beatmapData;
+    extern GlobalNamespace::EnvironmentInfoSO* environment;
+    extern GlobalNamespace::AudioTimeSyncController* audioTimeSyncController;
+    extern GlobalNamespace::BeatmapCallbacksController* beatmapCallbacksController;
+    extern GlobalNamespace::BeatmapObjectManager* beatmapObjectManager;
+    extern GlobalNamespace::ComboController* comboController;
+    extern GlobalNamespace::GameEnergyCounter* gameEnergyCounter;
+    extern GlobalNamespace::ScoreController* scoreController;
     extern GlobalNamespace::SaberManager* saberManager;
     extern UnityEngine::Camera* mainCamera;
 
     extern bool stateValid;
+    extern bool referencesValid;
     extern bool mapWasQuit;
 
     void Initialize();

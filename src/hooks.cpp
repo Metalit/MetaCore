@@ -138,11 +138,16 @@ MAKE_AUTO_HOOK_MATCH(
     }
 
     if (info->allIsOK) {
-        Internals::combo++;
-        if (left)
-            Internals::leftCombo++;
-        else
-            Internals::rightCombo++;
+        if (++Internals::combo > Internals::highestCombo)
+            Internals::highestCombo = Internals::combo;
+        if (left) {
+            if (++Internals::leftCombo > Internals::highestLeftCombo)
+                Internals::highestLeftCombo = Internals::leftCombo;
+        }
+        else {
+            if (++Internals::rightCombo > Internals::highestRightCombo)
+                Internals::highestRightCombo = Internals::rightCombo;
+        }
     } else {
         Internals::combo = 0;
         if (left) {

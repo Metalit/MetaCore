@@ -3,6 +3,13 @@
 #include "internals.hpp"
 #include "main.hpp"
 
+static inline bool IsLeft(int saber) {
+    return saber == MetaCore::Stats::LeftSaber || saber == MetaCore::Stats::BothSabers;
+}
+static inline bool IsRight(int saber) {
+    return saber == MetaCore::Stats::RightSaber || saber == MetaCore::Stats::BothSabers;
+}
+
 bool MetaCore::Stats::IsFakeNote(GlobalNamespace::NoteData* data) {
     return data->scoringType == GlobalNamespace::NoteData::ScoringType::NoScore ||
            data->scoringType == GlobalNamespace::NoteData::ScoringType::Ignore;
@@ -13,13 +20,6 @@ bool MetaCore::Stats::ShouldCountNote(GlobalNamespace::NoteData* data) {
         return false;
     return data->gameplayType == GlobalNamespace::NoteData::GameplayType::Normal ||
            data->gameplayType == GlobalNamespace::NoteData::GameplayType::BurstSliderHead;
-}
-
-static bool IsLeft(int saber) {
-    return saber == MetaCore::Stats::LeftSaber || saber == MetaCore::Stats::BothSabers;
-}
-static bool IsRight(int saber) {
-    return saber == MetaCore::Stats::RightSaber || saber == MetaCore::Stats::BothSabers;
 }
 
 int MetaCore::Stats::GetScore(int saber) {
@@ -45,16 +45,24 @@ int MetaCore::Stats::GetSongMaxScore() {
 }
 
 int MetaCore::Stats::GetCombo(int saber) {
-    if (saber == BothSabers)
-        return Internals::combo;
-    else if (IsLeft(saber))
+    if (saber == LeftSaber)
         return Internals::leftCombo;
-    else
+    else if (saber == RightSaber)
         return Internals::rightCombo;
+    return Internals::combo;
+}
+
+int MetaCore::Stats::GetHighestCombo(int saber) {
+    if (saber == LeftSaber)
+        return Internals::highestLeftCombo;
+    else if (saber == RightSaber)
+        return Internals::highestRightCombo;
+    return Internals::highestCombo;
 }
 
 bool MetaCore::Stats::GetFullCombo(int saber) {
-    if (Internals::wallsHit > 0)
+    // ignore walls for individual sabers to match their individual combo trackers
+    if (saber == BothSabers && Internals::wallsHit > 0)
         return false;
     if (IsLeft(saber) && Internals::bombsLeftHit + Internals::notesLeftBadCut + Internals::notesLeftMissed > 0)
         return false;
@@ -64,25 +72,44 @@ bool MetaCore::Stats::GetFullCombo(int saber) {
 }
 
 int MetaCore::Stats::GetMultiplier() {
-    if (Internals::combo < 2)
+    return Internals::multiplier;
+}
+
+float MetaCore::Stats::GetMultiplierProgress(bool allLevels) {
+    if (!allLevels)
+        return Internals::multiplierProgress / (float) (Internals::multiplier * 2);
+    int previous = 0;
+    if (Internals::multiplier == 8)
+        previous = 2 + 4 + 8;
+    else if (Internals::multiplier == 4)
+        previous = 2 + 4;
+    else if (Internals::multiplier == 2)
+        previous = 2;
+    return (previous + Internals::multiplierProgress) / 14.0;
+}
+
+int MetaCore::Stats::GetMaxMultiplier() {
+    int notes = GetTotalNotes(BothSabers);
+    if (notes < 2)
         return 1;
-    if (Internals::combo < 2 + 4)
+    if (notes < 2 + 4)
         return 2;
-    if (Internals::combo < 2 + 4 + 8)
+    if (notes < 2 + 4 + 8)
         return 4;
     return 8;
 }
 
-float MetaCore::Stats::GetMultiplierProgress(bool allLevels) {
+float MetaCore::Stats::GetMaxMultiplierProgress(bool allLevels) {
+    int notes = GetTotalNotes(BothSabers);
     if (allLevels)
-        return std::min(Internals::combo / 14.0, 1.0);
-    if (Internals::combo >= 2 + 4 + 8)
+        return std::min(notes / 14.0, 1.0);
+    if (notes >= 2 + 4 + 8)
         return 1;
-    if (Internals::combo >= 2 + 4)
-        return (Internals::combo - 2 - 4) / 8.0;
-    if (Internals::combo >= 2)
-        return (Internals::combo - 2) / 4.0;
-    return Internals::combo / 2.0;
+    if (notes >= 2 + 4)
+        return (notes - 2 - 4) / 8.0;
+    if (notes >= 2)
+        return (notes - 2) / 4.0;
+    return notes / 2.0;
 }
 
 float MetaCore::Stats::GetHealth() {
@@ -95,6 +122,10 @@ float MetaCore::Stats::GetSongTime() {
 
 float MetaCore::Stats::GetSongLength() {
     return Internals::songLength;
+}
+
+float MetaCore::Stats::GetSongSpeed() {
+    return Internals::songSpeed;
 }
 
 int MetaCore::Stats::GetTotalNotes(int saber) {
