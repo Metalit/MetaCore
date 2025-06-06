@@ -28,6 +28,10 @@ namespace MetaCore::Events {
         MapSelected,
         // After the current map is deselected without a new one being selected
         MapDeselected,
+        // After a new playlist is selected in the menu
+        PlaylistSelected,
+        // After the current playlist is deselected without a new one being selected
+        PlaylistDeselected,
         // After a new map is fully started
         MapStarted,
         // After a map is paused
@@ -38,17 +42,13 @@ namespace MetaCore::Events {
         MapRestarted,
         // Immediately when a map ends
         MapEnded,
-        // After a map ends and the scene has transitioned back to the menu
+        // After the scene has finished transitioning to gameplay and stats are available
+        GameplaySceneStarted,
+        // After a map ends or restarts and the scene has transitioned out of gameplay
         GameplaySceneEnded,
         // After the score submission status changes
         ScoreSubmission,
-        // After the scene has finished transitioning to gameplay and stats are available
-        GameplaySceneStarted,
-        // After a new playlist is selected in the menu
-        PlaylistSelected,
-        // After the current playlist is deselected without a new one being selected
-        PlaylistDeselected,
-        EventMax = PlaylistDeselected,
+        EventMax = ScoreSubmission,
     };
 
     /// @brief Registers a custom event for future broadcasts
