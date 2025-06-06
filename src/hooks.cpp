@@ -91,25 +91,25 @@ MAKE_AUTO_HOOK_MATCH(
     bool isGoodScoreFixed = scoringElement->noteData->gameplayType == NoteData::GameplayType::BurstSliderElement;
 
     if (scoringElement->noteData->colorType == ColorType::ColorA) {
-        Internals::leftScore() += cutScore;
-        Internals::leftMaxScore() += maxCutScore;
+        Internals::leftScore += cutScore;
+        Internals::leftMaxScore += maxCutScore;
         if (badCut) {
             if (isGoodScoreFixed)
-                Internals::leftMissedFixedScore() += maxCutScore;
+                Internals::leftMissedFixedScore += maxCutScore;
             else
-                Internals::leftMissedMaxScore() += maxCutScore;
+                Internals::leftMissedMaxScore += maxCutScore;
         } else
-            Internals::leftMissedFixedScore() += (scoringElement->cutScore * scoringElement->maxMultiplier) - cutScore;
+            Internals::leftMissedFixedScore += (scoringElement->cutScore * scoringElement->maxMultiplier) - cutScore;
     } else {
-        Internals::rightScore() += cutScore;
-        Internals::rightMaxScore() += maxCutScore;
+        Internals::rightScore += cutScore;
+        Internals::rightMaxScore += maxCutScore;
         if (badCut) {
             if (isGoodScoreFixed)
-                Internals::rightMissedFixedScore() += maxCutScore;
+                Internals::rightMissedFixedScore += maxCutScore;
             else
-                Internals::rightMissedMaxScore() += maxCutScore;
+                Internals::rightMissedMaxScore += maxCutScore;
         } else
-            Internals::rightMissedFixedScore() += (scoringElement->cutScore * scoringElement->maxMultiplier) - cutScore;
+            Internals::rightMissedFixedScore += (scoringElement->cutScore * scoringElement->maxMultiplier) - cutScore;
     }
     Events::Broadcast(Events::ScoreChanged);
 }
@@ -132,31 +132,31 @@ MAKE_AUTO_HOOK_MATCH(
 
     if (!bomb && Stats::ShouldCountNote(noteController->noteData)) {
         if (left)
-            Internals::remainingNotesLeft()--;
+            Internals::remainingNotesLeft--;
         else
-            Internals::remainingNotesRight()--;
+            Internals::remainingNotesRight--;
     }
 
     if (info->allIsOK) {
-        Internals::combo()++;
+        Internals::combo++;
         if (left)
-            Internals::leftCombo()++;
+            Internals::leftCombo++;
         else
-            Internals::rightCombo()++;
+            Internals::rightCombo++;
     } else {
-        Internals::combo() = 0;
+        Internals::combo = 0;
         if (left) {
             if (bomb)
-                Internals::bombsLeftHit()++;
+                Internals::bombsLeftHit++;
             else
-                Internals::notesLeftBadCut()++;
-            Internals::leftCombo() = 0;
+                Internals::notesLeftBadCut++;
+            Internals::leftCombo = 0;
         } else {
             if (bomb)
-                Internals::bombsRightHit()++;
+                Internals::bombsRightHit++;
             else
-                Internals::notesRightBadCut()++;
-            Internals::rightCombo() = 0;
+                Internals::notesRightBadCut++;
+            Internals::rightCombo = 0;
         }
         if (bomb)
             Events::Broadcast(Events::BombCut);
@@ -179,17 +179,17 @@ MAKE_AUTO_HOOK_MATCH(
     if (noteController->noteData->gameplayType == NoteData::GameplayType::Bomb || Stats::IsFakeNote(noteController->noteData))
         return;
 
-    Internals::combo() = 0;
+    Internals::combo = 0;
     if (noteController->noteData->colorType == ColorType::ColorA) {
-        Internals::leftCombo() = 0;
-        Internals::notesLeftMissed()++;
+        Internals::leftCombo = 0;
+        Internals::notesLeftMissed++;
         if (Stats::ShouldCountNote(noteController->noteData))
-            Internals::remainingNotesLeft()--;
+            Internals::remainingNotesLeft--;
     } else {
-        Internals::rightCombo() = 0;
-        Internals::notesRightMissed()++;
+        Internals::rightCombo = 0;
+        Internals::notesRightMissed++;
         if (Stats::ShouldCountNote(noteController->noteData))
-            Internals::remainingNotesRight()--;
+            Internals::remainingNotesRight--;
     }
     Events::Broadcast(Events::NoteMissed);
     Events::Broadcast(Events::ComboChanged);
@@ -210,17 +210,17 @@ MAKE_AUTO_HOOK_MATCH(
         if (self->noteScoreDefinition->maxAfterCutScore == 0)  // TODO: selectively exclude from averages?
             after = 30;
         if (self->noteCutInfo.saberType == SaberType::SaberA) {
-            Internals::notesLeftCut()++;
-            Internals::leftPreSwing() += self->beforeCutScore;
-            Internals::leftPostSwing() += after;
-            Internals::leftAccuracy() += self->centerDistanceCutScore;
-            Internals::leftTimeDependence() += std::abs(self->noteCutInfo.cutNormal.z);
+            Internals::notesLeftCut++;
+            Internals::leftPreSwing += self->beforeCutScore;
+            Internals::leftPostSwing += after;
+            Internals::leftAccuracy += self->centerDistanceCutScore;
+            Internals::leftTimeDependence += std::abs(self->noteCutInfo.cutNormal.z);
         } else {
-            Internals::notesRightCut()++;
-            Internals::rightPreSwing() += self->beforeCutScore;
-            Internals::rightPostSwing() += after;
-            Internals::rightAccuracy() += self->centerDistanceCutScore;
-            Internals::rightTimeDependence() += std::abs(self->noteCutInfo.cutNormal.z);
+            Internals::notesRightCut++;
+            Internals::rightPreSwing += self->beforeCutScore;
+            Internals::rightPostSwing += after;
+            Internals::rightAccuracy += self->centerDistanceCutScore;
+            Internals::rightTimeDependence += std::abs(self->noteCutInfo.cutNormal.z);
         }
         Events::Broadcast(Events::NoteCut);
     }
@@ -236,8 +236,8 @@ MAKE_AUTO_HOOK_MATCH(
 ) {
     BeatmapObjectExecutionRatingsRecorder_HandlePlayerHeadDidEnterObstacle(self, obstacleController);
 
-    Internals::wallsHit()++;
-    Internals::combo() = 0;
+    Internals::wallsHit++;
+    Internals::combo = 0;
     Events::Broadcast(Events::WallHit);
     Events::Broadcast(Events::ComboChanged);
 }
@@ -250,11 +250,11 @@ MAKE_AUTO_HOOK_MATCH(
 
     GameEnergyCounter_ProcessEnergyChange(self, energyChange);
 
-    if (Internals::noFail() && wasAbove0 && self->_didReach0Energy) {
-        Internals::negativeMods() -= 0.5;
+    if (Internals::noFail && wasAbove0 && self->_didReach0Energy) {
+        Internals::negativeMods -= 0.5;
         Events::Broadcast(Events::ScoreChanged);
     }
-    Internals::health() = self->energy;
+    Internals::health = self->energy;
     Events::Broadcast(Events::HealthChanged);
 }
 
@@ -303,7 +303,7 @@ MAKE_AUTO_HOOK_MATCH(AudioTimeSyncController_Update, &AudioTimeSyncController::U
         return;
 
     Internals::DoSlowUpdate();
-    Internals::songTime() = self->songTime;
+    Internals::songTime = self->songTime;
     Events::Broadcast(Events::Update);
 }
 

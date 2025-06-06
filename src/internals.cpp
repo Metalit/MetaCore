@@ -106,7 +106,7 @@ static float GetNegativeMods(ScoreController* controller) {
     auto mods = ListW<GameplayModifierParamsSO*>(controller->_gameplayModifierParams);
     for (auto& mod : mods) {
         if (mod == controller->_gameplayModifiersModel->_noFailOn0Energy.ptr()) {
-            Internals::startingState.noFail = true;
+            Internals::noFail = true;
             continue;
         }
         float mult = mod->multiplier;
@@ -131,8 +131,63 @@ static float GetHealth(ScoreController* controller) {
     return controller->_gameEnergyCounter->energy;
 }
 
-Internals::State Internals::startingState;
-Internals::State Internals::currentState;
+int Internals::leftScore;
+int Internals::rightScore;
+int Internals::leftMaxScore;
+int Internals::rightMaxScore;
+int Internals::songMaxScore;
+int Internals::leftCombo;
+int Internals::rightCombo;
+int Internals::combo;
+float Internals::health;
+float Internals::songTime;
+float Internals::songLength;
+int Internals::notesLeftCut;
+int Internals::notesRightCut;
+int Internals::notesLeftBadCut;
+int Internals::notesRightBadCut;
+int Internals::notesLeftMissed;
+int Internals::notesRightMissed;
+int Internals::bombsLeftHit;
+int Internals::bombsRightHit;
+int Internals::wallsHit;
+int Internals::remainingNotesLeft;
+int Internals::remainingNotesRight;
+int Internals::songNotesLeft;
+int Internals::songNotesRight;
+int Internals::leftPreSwing;
+int Internals::rightPreSwing;
+int Internals::leftPostSwing;
+int Internals::rightPostSwing;
+int Internals::leftAccuracy;
+int Internals::rightAccuracy;
+float Internals::leftTimeDependence;
+float Internals::rightTimeDependence;
+std::vector<float> Internals::leftSpeeds;
+std::vector<float> Internals::rightSpeeds;
+std::vector<float> Internals::leftAngles;
+std::vector<float> Internals::rightAngles;
+bool Internals::noFail;
+GlobalNamespace::GameplayModifiers* Internals::modifiers;
+float Internals::positiveMods;
+float Internals::negativeMods;
+int Internals::personalBest;
+int Internals::fails;
+int Internals::restarts;
+GlobalNamespace::ColorScheme* Internals::colors;
+GlobalNamespace::BeatmapLevel* Internals::beatmapLevel;
+GlobalNamespace::BeatmapKey Internals::beatmapKey;
+GlobalNamespace::BeatmapData* Internals::beatmapData;
+GlobalNamespace::EnvironmentInfoSO* Internals::environment;
+int Internals::leftMissedMaxScore;
+int Internals::rightMissedMaxScore;
+int Internals::leftMissedFixedScore;
+int Internals::rightMissedFixedScore;
+UnityEngine::Quaternion Internals::prevRotLeft;
+UnityEngine::Quaternion Internals::prevRotRight;
+GlobalNamespace::SaberManager* Internals::saberManager;
+UnityEngine::Camera* Internals::mainCamera;
+
 bool Internals::stateValid = false;
 bool Internals::mapWasQuit = false;
 
@@ -153,82 +208,80 @@ void Internals::Initialize() {
         gameplayCoreInstaller = gameplayCoreInstallers->FirstOrDefault();
     auto setupData = gameplayCoreInstaller ? gameplayCoreInstaller->_sceneSetupData : nullptr;
 
-    startingState.leftScore = 0;
-    startingState.rightScore = 0;
-    startingState.leftMaxScore = 0;
-    startingState.rightMaxScore = 0;
-    startingState.songMaxScore = GetMaxScore(beatmapCallbacksUpdater);
-    startingState.leftCombo = 0;
-    startingState.rightCombo = 0;
-    startingState.combo = 0;
-    startingState.health = GetHealth(scoreController);
-    startingState.songTime = 0;
-    startingState.songLength = GetSongLength(scoreController);
-    startingState.notesLeftCut = 0;
-    startingState.notesRightCut = 0;
-    startingState.notesLeftBadCut = 0;
-    startingState.notesRightBadCut = 0;
-    startingState.notesLeftMissed = 0;
-    startingState.notesRightMissed = 0;
-    startingState.bombsLeftHit = 0;
-    startingState.bombsRightHit = 0;
-    startingState.wallsHit = 0;
+    leftScore = 0;
+    rightScore = 0;
+    leftMaxScore = 0;
+    rightMaxScore = 0;
+    songMaxScore = GetMaxScore(beatmapCallbacksUpdater);
+    leftCombo = 0;
+    rightCombo = 0;
+    combo = 0;
+    health = GetHealth(scoreController);
+    songTime = 0;
+    songLength = GetSongLength(scoreController);
+    notesLeftCut = 0;
+    notesRightCut = 0;
+    notesLeftBadCut = 0;
+    notesRightBadCut = 0;
+    notesLeftMissed = 0;
+    notesRightMissed = 0;
+    bombsLeftHit = 0;
+    bombsRightHit = 0;
+    wallsHit = 0;
     auto pair = GetNoteCount(beatmapCallbacksUpdater, true);
-    startingState.remainingNotesLeft = pair.first;
-    startingState.songNotesLeft = pair.second;
+    remainingNotesLeft = pair.first;
+    songNotesLeft = pair.second;
     pair = GetNoteCount(beatmapCallbacksUpdater, false);
-    startingState.remainingNotesRight = pair.first;
-    startingState.songNotesRight = pair.second;
-    startingState.leftPreSwing = 0;
-    startingState.rightPreSwing = 0;
-    startingState.leftPostSwing = 0;
-    startingState.rightPostSwing = 0;
-    startingState.leftAccuracy = 0;
-    startingState.rightAccuracy = 0;
-    startingState.leftTimeDependence = 0;
-    startingState.rightTimeDependence = 0;
-    startingState.leftSpeeds = {};
-    startingState.rightSpeeds = {};
-    startingState.leftAngles = {};
-    startingState.rightAngles = {};
-    startingState.noFail = false;
-    startingState.modifiers = scoreController ? scoreController->_gameplayModifiers : nullptr;
+    remainingNotesRight = pair.first;
+    songNotesRight = pair.second;
+    leftPreSwing = 0;
+    rightPreSwing = 0;
+    leftPostSwing = 0;
+    rightPostSwing = 0;
+    leftAccuracy = 0;
+    rightAccuracy = 0;
+    leftTimeDependence = 0;
+    rightTimeDependence = 0;
+    leftSpeeds = {};
+    rightSpeeds = {};
+    leftAngles = {};
+    rightAngles = {};
+    noFail = false;
+    modifiers = scoreController ? scoreController->_gameplayModifiers : nullptr;
     // GetNegativeMods sets noFail
-    startingState.positiveMods = GetPositiveMods(scoreController);
-    startingState.negativeMods = GetNegativeMods(scoreController);
-    startingState.personalBest = GetHighScore(playerDataModel, gameplayCoreInstaller);
-    startingState.fails = GetFailCount(playerDataModel);
+    positiveMods = GetPositiveMods(scoreController);
+    negativeMods = GetNegativeMods(scoreController);
+    personalBest = GetHighScore(playerDataModel, gameplayCoreInstaller);
+    fails = GetFailCount(playerDataModel);
 
-    logger.debug("modifiers {} -{}", startingState.positiveMods, startingState.negativeMods);
+    logger.debug("modifiers {} -{}", positiveMods, negativeMods);
 
     std::string beatmap = "Unknown";
     if (setupData)
         beatmap = (std::string) setupData->beatmapKey.SerializedName();
     if (beatmap != lastBeatmap)
-        startingState.restarts = 0;
+        restarts = 0;
     else
-        startingState.restarts++;
+        restarts++;
     lastBeatmap = beatmap;
     timeSinceSlowUpdate = 0;
 
-    startingState.colors = setupData ? setupData->colorScheme : nullptr;
-    startingState.beatmapLevel = setupData ? setupData->beatmapLevel : nullptr;
-    startingState.beatmapKey = setupData ? setupData->beatmapKey : BeatmapKey();
-    startingState.beatmapData = beatmapCallbacksUpdater ? (BeatmapData*) beatmapCallbacksUpdater->_beatmapCallbacksController->_beatmapData : nullptr;
-    startingState.environment = setupData ? setupData->targetEnvironmentInfo : nullptr;
+    colors = setupData ? setupData->colorScheme : nullptr;
+    beatmapLevel = setupData ? setupData->beatmapLevel : nullptr;
+    beatmapKey = setupData ? setupData->beatmapKey : BeatmapKey();
+    beatmapData = beatmapCallbacksUpdater ? (BeatmapData*) beatmapCallbacksUpdater->_beatmapCallbacksController->_beatmapData : nullptr;
+    environment = setupData ? setupData->targetEnvironmentInfo : nullptr;
 
-    startingState.leftMissedMaxScore = 0;
-    startingState.rightMissedMaxScore = 0;
-    startingState.leftMissedFixedScore = 0;
-    startingState.rightMissedFixedScore = 0;
+    leftMissedMaxScore = 0;
+    rightMissedMaxScore = 0;
+    leftMissedFixedScore = 0;
+    rightMissedFixedScore = 0;
 
-    startingState.prevRotLeft = Quaternion::get_identity();
-    startingState.prevRotRight = Quaternion::get_identity();
-    startingState.saberManager = Object::FindObjectOfType<SaberManager*>(true);
-    startingState.mainCamera = Camera::get_main();
-    startingState.modExtraData.clear();
+    prevRotLeft = Quaternion::get_identity();
+    prevRotRight = Quaternion::get_identity();
+    saberManager = Object::FindObjectOfType<SaberManager*>(true);
+    mainCamera = Camera::get_main();
 
-    currentState = startingState;
     stateValid = true;
 }
 
@@ -238,21 +291,21 @@ void Internals::DoSlowUpdate() {
 
     timeSinceSlowUpdate += Time::get_deltaTime();
     if (timeSinceSlowUpdate > 1 / (float) SLOW_UPDATES_PER_SEC) {
-        if (auto saberManager = currentState.saberManager; saberManager && saberManager->leftSaber && saberManager->rightSaber) {
-            currentState.leftSpeeds.emplace_back(saberManager->leftSaber->bladeSpeed);
-            currentState.rightSpeeds.emplace_back(saberManager->rightSaber->bladeSpeed);
+        if (saberManager && saberManager->leftSaber && saberManager->rightSaber) {
+            leftSpeeds.emplace_back(saberManager->leftSaber->bladeSpeed);
+            rightSpeeds.emplace_back(saberManager->rightSaber->bladeSpeed);
 
             auto rotLeft = saberManager->leftSaber->transform->rotation;
             auto rotRight = saberManager->rightSaber->transform->rotation;
             // use speeds array as tracker for if prevRots have accurate values
-            if (currentState.leftSpeeds.size() > 1) {
-                currentState.leftAngles.emplace_back(Quaternion::Angle(rotLeft, currentState.prevRotLeft));
-                currentState.rightAngles.emplace_back(Quaternion::Angle(rotRight, currentState.prevRotRight));
+            if (leftSpeeds.size() > 1) {
+                leftAngles.emplace_back(Quaternion::Angle(rotLeft, prevRotLeft));
+                rightAngles.emplace_back(Quaternion::Angle(rotRight, prevRotRight));
             }
-            currentState.prevRotLeft = rotLeft;
-            currentState.prevRotRight = rotRight;
+            prevRotLeft = rotLeft;
+            prevRotRight = rotRight;
         }
-        timeSinceSlowUpdate = 0;
+        timeSinceSlowUpdate -= 1 / (float) SLOW_UPDATES_PER_SEC;
         Events::Broadcast(Events::SlowUpdate);
     }
 }

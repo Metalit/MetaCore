@@ -22,138 +22,136 @@ static bool IsRight(int saber) {
     return saber == MetaCore::Stats::RightSaber || saber == MetaCore::Stats::BothSabers;
 }
 
-#define STATE(var) Internals::currentState.var
-
 int MetaCore::Stats::GetScore(int saber) {
     int ret = 0;
     if (IsLeft(saber))
-        ret += STATE(leftScore);
+        ret += Internals::leftScore;
     if (IsRight(saber))
-        ret += STATE(rightScore);
+        ret += Internals::rightScore;
     return ret;
 }
 
 int MetaCore::Stats::GetMaxScore(int saber) {
     int ret = 0;
     if (IsLeft(saber))
-        ret += STATE(leftMaxScore);
+        ret += Internals::leftMaxScore;
     if (IsRight(saber))
-        ret += STATE(rightMaxScore);
+        ret += Internals::rightMaxScore;
     return ret;
 }
 
 int MetaCore::Stats::GetSongMaxScore() {
-    return STATE(songMaxScore);
+    return Internals::songMaxScore;
 }
 
 int MetaCore::Stats::GetCombo(int saber) {
     if (saber == BothSabers)
-        return STATE(combo);
+        return Internals::combo;
     else if (IsLeft(saber))
-        return STATE(leftCombo);
+        return Internals::leftCombo;
     else
-        return STATE(rightCombo);
+        return Internals::rightCombo;
 }
 
 bool MetaCore::Stats::GetFullCombo(int saber) {
-    if (STATE(wallsHit) > 0)
+    if (Internals::wallsHit > 0)
         return false;
-    if (IsLeft(saber) && STATE(bombsLeftHit) + STATE(notesLeftBadCut) + STATE(notesLeftMissed) > 0)
+    if (IsLeft(saber) && Internals::bombsLeftHit + Internals::notesLeftBadCut + Internals::notesLeftMissed > 0)
         return false;
-    if (IsRight(saber) && STATE(bombsRightHit) + STATE(notesRightBadCut) + STATE(notesRightMissed) > 0)
+    if (IsRight(saber) && Internals::bombsRightHit + Internals::notesRightBadCut + Internals::notesRightMissed > 0)
         return false;
     return true;
 }
 
 int MetaCore::Stats::GetMultiplier() {
-    if (STATE(combo) < 2)
+    if (Internals::combo < 2)
         return 1;
-    if (STATE(combo) < 2 + 4)
+    if (Internals::combo < 2 + 4)
         return 2;
-    if (STATE(combo) < 2 + 4 + 8)
+    if (Internals::combo < 2 + 4 + 8)
         return 4;
     return 8;
 }
 
 float MetaCore::Stats::GetMultiplierProgress(bool allLevels) {
     if (allLevels)
-        return std::min(STATE(combo) / 14.0, 1.0);
-    if (STATE(combo) >= 2 + 4 + 8)
+        return std::min(Internals::combo / 14.0, 1.0);
+    if (Internals::combo >= 2 + 4 + 8)
         return 1;
-    if (STATE(combo) >= 2 + 4)
-        return (STATE(combo) - 2 - 4) / 8.0;
-    if (STATE(combo) >= 2)
-        return (STATE(combo) - 2) / 4.0;
-    return STATE(combo) / 2.0;
+    if (Internals::combo >= 2 + 4)
+        return (Internals::combo - 2 - 4) / 8.0;
+    if (Internals::combo >= 2)
+        return (Internals::combo - 2) / 4.0;
+    return Internals::combo / 2.0;
 }
 
 float MetaCore::Stats::GetHealth() {
-    return STATE(health);
+    return Internals::health;
 }
 
 float MetaCore::Stats::GetSongTime() {
-    return STATE(songTime);
+    return Internals::songTime;
 }
 
 float MetaCore::Stats::GetSongLength() {
-    return STATE(songLength);
+    return Internals::songLength;
 }
 
 int MetaCore::Stats::GetTotalNotes(int saber) {
     int ret = 0;
     if (IsLeft(saber))
-        ret += STATE(notesLeftCut) + STATE(notesLeftBadCut) + STATE(notesLeftMissed);
+        ret += Internals::notesLeftCut + Internals::notesLeftBadCut + Internals::notesLeftMissed;
     if (IsRight(saber))
-        ret += STATE(notesRightCut) + STATE(notesRightBadCut) + STATE(notesRightMissed);
+        ret += Internals::notesRightCut + Internals::notesRightBadCut + Internals::notesRightMissed;
     return ret;
 }
 
 int MetaCore::Stats::GetNotesCut(int saber) {
     int ret = 0;
     if (IsLeft(saber))
-        ret += STATE(notesLeftCut);
+        ret += Internals::notesLeftCut;
     if (IsRight(saber))
-        ret += STATE(notesRightCut);
+        ret += Internals::notesRightCut;
     return ret;
 }
 
 int MetaCore::Stats::GetNotesMissed(int saber) {
     int ret = 0;
     if (IsLeft(saber))
-        ret += STATE(notesLeftMissed);
+        ret += Internals::notesLeftMissed;
     if (IsRight(saber))
-        ret += STATE(notesRightMissed);
+        ret += Internals::notesRightMissed;
     return ret;
 }
 
 int MetaCore::Stats::GetNotesBadCut(int saber) {
     int ret = 0;
     if (IsLeft(saber))
-        ret += STATE(notesLeftBadCut);
+        ret += Internals::notesLeftBadCut;
     if (IsRight(saber))
-        ret += STATE(notesRightBadCut);
+        ret += Internals::notesRightBadCut;
     return ret;
 }
 
 int MetaCore::Stats::GetBombsHit(int saber) {
     int ret = 0;
     if (IsLeft(saber))
-        ret += STATE(bombsLeftHit);
+        ret += Internals::bombsLeftHit;
     if (IsRight(saber))
-        ret += STATE(bombsRightHit);
+        ret += Internals::bombsRightHit;
     return ret;
 }
 
 int MetaCore::Stats::GetWallsHit() {
-    return STATE(wallsHit);
+    return Internals::wallsHit;
 }
 
 int MetaCore::Stats::GetSongNotes(int saber) {
     int ret = 0;
     if (IsLeft(saber))
-        ret += STATE(songNotesLeft);
+        ret += Internals::songNotesLeft;
     if (IsRight(saber))
-        ret += STATE(songNotesRight);
+        ret += Internals::songNotesRight;
     return ret;
 }
 
@@ -163,9 +161,9 @@ float MetaCore::Stats::GetPreSwing(int saber) {
         return 0;
     int ret = 0;
     if (IsLeft(saber))
-        ret += STATE(leftPreSwing);
+        ret += Internals::leftPreSwing;
     if (IsRight(saber))
-        ret += STATE(rightPreSwing);
+        ret += Internals::rightPreSwing;
     return ret / (float) notes;
 }
 
@@ -175,9 +173,9 @@ float MetaCore::Stats::GetPostSwing(int saber) {
         return 0;
     int ret = 0;
     if (IsLeft(saber))
-        ret += STATE(leftPostSwing);
+        ret += Internals::leftPostSwing;
     if (IsRight(saber))
-        ret += STATE(rightPostSwing);
+        ret += Internals::rightPostSwing;
     return ret / (float) notes;
 }
 
@@ -187,9 +185,9 @@ float MetaCore::Stats::GetAccuracy(int saber) {
         return 0;
     int ret = 0;
     if (IsLeft(saber))
-        ret += STATE(leftAccuracy);
+        ret += Internals::leftAccuracy;
     if (IsRight(saber))
-        ret += STATE(rightAccuracy);
+        ret += Internals::rightAccuracy;
     return ret / (float) notes;
 }
 
@@ -199,9 +197,9 @@ float MetaCore::Stats::GetTimeDependence(int saber) {
         return 0;
     float ret = 0;
     if (IsLeft(saber))
-        ret += STATE(leftTimeDependence);
+        ret += Internals::leftTimeDependence;
     if (IsRight(saber))
-        ret += STATE(rightTimeDependence);
+        ret += Internals::rightTimeDependence;
     return ret / notes;
 }
 
@@ -209,14 +207,14 @@ float MetaCore::Stats::GetAverageSpeed(int saber) {
     float ret = 0;
     int div = 0;
     if (IsLeft(saber)) {
-        for (auto& val : STATE(leftSpeeds))
+        for (auto& val : Internals::leftSpeeds)
             ret += val;
-        div += STATE(leftSpeeds).size();
+        div += Internals::leftSpeeds.size();
     }
     if (IsRight(saber)) {
-        for (auto& val : STATE(rightSpeeds))
+        for (auto& val : Internals::rightSpeeds)
             ret += val;
-        div += STATE(rightSpeeds).size();
+        div += Internals::rightSpeeds.size();
     }
     if (div == 0)
         return 0;
@@ -227,16 +225,16 @@ float MetaCore::Stats::GetBestSpeed5Secs(int saber) {
     float ret = 0;
     int back = SLOW_UPDATES_PER_SEC * 5;
     if (IsLeft(saber)) {
-        int size = STATE(leftSpeeds).size();
+        int size = Internals::leftSpeeds.size();
         int start = std::max(0, size - back);
         for (int i = start; i < size; i++)
-            ret = std::max(ret, STATE(leftSpeeds)[i]);
+            ret = std::max(ret, Internals::leftSpeeds[i]);
     }
     if (IsRight(saber)) {
-        int size = STATE(rightSpeeds).size();
+        int size = Internals::rightSpeeds.size();
         int start = std::max(0, size - back);
         for (int i = start; i < size; i++)
-            ret = std::max(ret, STATE(rightSpeeds)[i]);
+            ret = std::max(ret, Internals::rightSpeeds[i]);
     }
     return ret;
 }
@@ -245,16 +243,16 @@ float MetaCore::Stats::GetLastSecAngle(int saber) {
     float ret = 0;
     int back = SLOW_UPDATES_PER_SEC;
     if (IsLeft(saber)) {
-        int size = STATE(leftAngles).size();
+        int size = Internals::leftAngles.size();
         int start = std::max(0, size - back);
         for (int i = start; i < size; i++)
-            ret += STATE(leftAngles)[i];
+            ret += Internals::leftAngles[i];
     }
     if (IsRight(saber)) {
-        int size = STATE(rightAngles).size();
+        int size = Internals::rightAngles.size();
         int start = std::max(0, size - back);
         for (int i = start; i < size; i++)
-            ret += STATE(rightAngles)[i];
+            ret += Internals::rightAngles[i];
     }
     if (saber == (int) BothSabers)
         ret /= 2;
@@ -264,11 +262,11 @@ float MetaCore::Stats::GetLastSecAngle(int saber) {
 float MetaCore::Stats::GetHighestSecAngle(int saber) {
     float ret = 0;
     if (IsLeft(saber)) {
-        for (auto& val : STATE(leftAngles))
+        for (auto& val : Internals::leftAngles)
             ret = std::max(ret, val);
     }
     if (IsRight(saber)) {
-        for (auto& val : STATE(rightAngles))
+        for (auto& val : Internals::rightAngles)
             ret = std::max(ret, val);
     }
     return ret * SLOW_UPDATES_PER_SEC;
@@ -277,22 +275,22 @@ float MetaCore::Stats::GetHighestSecAngle(int saber) {
 float MetaCore::Stats::GetModifierMultiplier(bool positive, bool negative) {
     float ret = 1;
     if (positive)
-        ret += STATE(positiveMods);
+        ret += Internals::positiveMods;
     if (negative)
-        ret += STATE(negativeMods);
+        ret += Internals::negativeMods;
     return ret;
 }
 
 int MetaCore::Stats::GetBestScore() {
-    return STATE(personalBest);
+    return Internals::personalBest;
 }
 
 int MetaCore::Stats::GetFails() {
-    return STATE(fails);
+    return Internals::fails;
 }
 
 int MetaCore::Stats::GetRestarts() {
-    return STATE(restarts);
+    return Internals::restarts;
 }
 
 int MetaCore::Stats::GetFCScore(int saber) {
@@ -300,12 +298,12 @@ int MetaCore::Stats::GetFCScore(int saber) {
     int missed = 0;
     int fixed = 0;
     if (IsLeft(saber)) {
-        missed += STATE(leftMissedMaxScore);
-        fixed += STATE(leftMissedFixedScore);
+        missed += Internals::leftMissedMaxScore;
+        fixed += Internals::leftMissedFixedScore;
     }
     if (IsRight(saber)) {
-        missed += STATE(rightMissedMaxScore);
-        fixed += STATE(rightMissedFixedScore);
+        missed += Internals::rightMissedMaxScore;
+        fixed += Internals::rightMissedFixedScore;
     }
     return (missed * swingRatio) + fixed + GetScore(saber);
 }
