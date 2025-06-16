@@ -14,14 +14,14 @@ static void RegisterButtonEvents() {
         MetaCore::Events::RegisterEvent(MetaCore::Input::ButtonEvents, i);
 }
 
-extern "C" void setup(CModInfo* info) {
+extern "C" METACORE_EXPORT void setup(CModInfo* info) {
     *info = modInfo.to_c();
     Paper::Logger::RegisterFileContextId(MOD_ID);
     RegisterButtonEvents();
     logger.info("Completed setup!");
 }
 
-extern "C" void late_load() {
+extern "C" METACORE_EXPORT void late_load() {
     il2cpp_functions::Init();
     custom_types::Register::AutoRegister();
     Hooks::Install();

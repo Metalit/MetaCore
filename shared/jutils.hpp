@@ -4,6 +4,8 @@
 
 #include <string>
 
+#include "export.h"
+
 /* JNI field and method signatures
 - Field signatures are simply their type in JNI form.
 - Method signatures are of the form "(argument-types)return-type" with no spaces.
@@ -76,17 +78,17 @@ namespace MetaCore::Java {
     /// @param env The JNIEnv instance for the thread
     /// @param clazz The information to find the class
     /// @return The java class if found, otherwise nullptr
-    jclass GetClass(JNIEnv* env, FindClass clazz);
+    METACORE_EXPORT jclass GetClass(JNIEnv* env, FindClass clazz);
     /// @brief Gets the java method id for a FindMethodID
     /// @param env The JNIEnv instance for the thread
     /// @param clazz The information to find the class of the method
     /// @param method The information to find the method
     /// @return The java method id if found, otherwise nullptr
-    jmethodID GetMethodID(JNIEnv* env, FindClass clazz, FindMethodID method);
+    METACORE_EXPORT jmethodID GetMethodID(JNIEnv* env, FindClass clazz, FindMethodID method);
     /// @brief Gets the java field id for a FindFieldID
     /// @param env The JNIEnv instance for the thread
     /// @param clazz The information to find the class of the field
     /// @param method The information to find the field
     /// @return The java field id if found, otherwise nullptr
-    jfieldID GetFieldID(JNIEnv* env, FindClass clazz, FindFieldID field);
+    METACORE_EXPORT jfieldID GetFieldID(JNIEnv* env, FindClass clazz, FindFieldID field);
 }
