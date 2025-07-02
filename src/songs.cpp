@@ -92,7 +92,7 @@ void MetaCore::Songs::GetSongCover(BeatmapLevel* beatmap, std::function<void(Uni
 
 // avoid back and forth string -> StringW conversions
 static BeatmapLevel* FindLevelInternal(StringW levelId) {
-    return MetaCore::Game::GetMenuTransitionsHelper()->_beatmapLevelsModel->GetBeatmapLevel(levelId);
+    return MetaCore::Game::GetAppDiContainer()->Resolve<BeatmapLevelsModel*>()->GetBeatmapLevel(levelId);
 }
 
 BeatmapLevel* MetaCore::Songs::FindLevel(std::string levelId) {

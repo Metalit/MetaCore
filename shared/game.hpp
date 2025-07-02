@@ -9,6 +9,7 @@
 #include "GlobalNamespace/SongPreviewPlayer.hpp"
 #include "UnityEngine/AudioClip.hpp"
 #include "UnityEngine/Material.hpp"
+#include "Zenject/DiContainer.hpp"
 #include "export.h"
 
 namespace MetaCore::Game {
@@ -69,4 +70,8 @@ namespace MetaCore::Game {
     /// @brief Gets the main system init
     /// @return The MainFlowCoordinator instance
     METACORE_EXPORT GlobalNamespace::MainSystemInit* GetMainSystemInit();
+
+    /// @brief Gets the zenject DiContainer from AppInit
+    /// @return The DiContainer instance
+    METACORE_EXPORT Zenject::DiContainer* GetAppDiContainer();
 }

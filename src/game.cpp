@@ -9,6 +9,8 @@
 #include "GlobalNamespace/PlayerDataFileModel.hpp"
 #include "GlobalNamespace/PlayerDataModel.hpp"
 #include "UnityEngine/Resources.hpp"
+#include "Zenject/SceneContext.hpp"
+#include "Zenject/SceneContextRegistry.hpp"
 #include "events.hpp"
 #include "main.hpp"
 #include "types.hpp"
@@ -125,7 +127,7 @@ MenuTransitionsHelper* MetaCore::Game::GetMenuTransitionsHelper() {
             };
     }
     if (!menuTransitionsHelper)
-        logger.warn("GetMainFlowCoordinator returning null");
+        logger.warn("GetMenuTransitionsHelper returning null");
     return menuTransitionsHelper.unsafePtr();
 }
 
@@ -153,6 +155,23 @@ MainSystemInit* MetaCore::Game::GetMainSystemInit() {
             };
     }
     if (!mainSystemInit)
-        logger.warn("GetMainFlowCoordinator returning null");
+        logger.warn("GetMainSystemInit returning null");
     return mainSystemInit.unsafePtr();
+}
+
+Zenject::DiContainer* MetaCore::Game::GetAppDiContainer() {
+    // notable alternative is
+    // Zenject::ProjectContext::Instance()->_container->Resolve<Zenject::SceneContextRegistry*>()->GetContextForScene("QuestInit")->_container
+    static UnityW<UnityEngine::GameObject> appSceneContext;
+    if (!appSceneContext) {
+        appSceneContext = UnityEngine::GameObject::Find("AppCoreSceneContext");
+        if (appSceneContext)
+            Engine::GetOrAddComponent<ObjectSignal*>(appSceneContext)->onDestroy = []() {
+                appSceneContext = nullptr;
+            };
+    }
+    auto container = appSceneContext ? appSceneContext->GetComponent<Zenject::SceneContext*>()->_container : nullptr;
+    if (!container)
+        logger.warn("GetAppDiContainer returning null");
+    return container;
 }

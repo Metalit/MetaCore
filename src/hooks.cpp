@@ -143,8 +143,7 @@ MAKE_AUTO_HOOK_MATCH(
         if (left) {
             if (++Internals::leftCombo > Internals::highestLeftCombo)
                 Internals::highestLeftCombo = Internals::leftCombo;
-        }
-        else {
+        } else {
             if (++Internals::rightCombo > Internals::highestRightCombo)
                 Internals::highestRightCombo = Internals::rightCombo;
         }
