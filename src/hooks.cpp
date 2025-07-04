@@ -19,6 +19,7 @@
 #include "GlobalNamespace/NoteController.hpp"
 #include "GlobalNamespace/NoteCutInfo.hpp"
 #include "GlobalNamespace/OVRInput.hpp"
+#include "GlobalNamespace/OculusAdvancedHapticFeedbackPlayer.hpp"
 #include "GlobalNamespace/OculusVRHelper.hpp"
 #include "GlobalNamespace/PartyFreePlayFlowCoordinator.hpp"
 #include "GlobalNamespace/PauseMenuManager.hpp"
@@ -637,7 +638,6 @@ MAKE_AUTO_HOOK_MATCH(
 }
 
 // disable haptics if requested
-
 MAKE_AUTO_HOOK_MATCH(
     OculusVRHelper_TriggerHapticPulse,
     &OculusVRHelper::TriggerHapticPulse,
@@ -650,6 +650,18 @@ MAKE_AUTO_HOOK_MATCH(
 ) {
     if (!Input::IsHapticsDisabled())
         OculusVRHelper_TriggerHapticPulse(self, node, duration, strength, frequency);
+}
+
+MAKE_AUTO_HOOK_MATCH(
+    OculusAdvancedHapticFeedbackPlayer_PlayHapticFeedback,
+    &OculusAdvancedHapticFeedbackPlayer::PlayHapticFeedback,
+    void,
+    OculusAdvancedHapticFeedbackPlayer* self,
+    UnityEngine::XR::XRNode node,
+    Libraries::HM::HMLib::VR::HapticPresetSO* hapticPreset
+) {
+    if (!Input::IsHapticsDisabled())
+        OculusAdvancedHapticFeedbackPlayer_PlayHapticFeedback(self, node, hapticPreset);
 }
 
 // hook abort and provide backtraces
