@@ -38,14 +38,17 @@
         "pwsh ./scripts/pull-tombstone.ps1 -analyze"
       ]
     },
-    "qmodIncludeDirs": [],
+    "qmodIncludeDirs": [
+      "./build",
+      "./extern/libs"
+    ],
     "qmodIncludeFiles": [],
-    "qmodOutput": null
+    "qmodOutput": "./MetaCore.qmod"
   },
   "dependencies": [
     {
       "id": "beatsaber-hook",
-      "versionRange": "^6.4.0",
+      "versionRange": "^6.4.2",
       "additionalData": {}
     },
     {
@@ -57,12 +60,12 @@
     },
     {
       "id": "bs-cordl",
-      "versionRange": "^4006.0.0",
+      "versionRange": "^4007.0.0",
       "additionalData": {}
     },
     {
       "id": "paper2_scotland2",
-      "versionRange": "^4.5.0",
+      "versionRange": "^4.6.4",
       "additionalData": {}
     },
     {
@@ -72,14 +75,14 @@
     },
     {
       "id": "custom-types",
-      "versionRange": "^0.18.2",
+      "versionRange": "^0.18.3",
       "additionalData": {
         "private": true
       }
     },
     {
       "id": "song-details",
-      "versionRange": "^1.0.2",
+      "versionRange": "^1.0.3",
       "additionalData": {
         "private": true
       }
