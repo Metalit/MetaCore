@@ -47,7 +47,7 @@ static int AddCallbackImpl(MetaCore::IndexMap<std::function<void(Ts...)>>& list,
 }
 
 template <bool Global, class... Ts>
-static int AddCallbackImpl(std::function<void(Ts...)> callback, bool once, int event = 0) {
+static int AddCallbackImpl(std::function<void(Ts...)> callback, bool once, int event) {
     if constexpr (Global)
         return AddCallbackImpl<Global>(globalCallbacks, callback, once, event);
     else
@@ -67,7 +67,7 @@ int MetaCore::Events::AddCallback(std::string mod, int event, std::function<void
 }
 
 int MetaCore::Events::AddCallback(std::function<void(int)> callback, bool once) {
-    return AddCallbackImpl<true>(std::move(callback), once);
+    return AddCallbackImpl<true>(std::move(callback), once, -1);
 }
 
 void MetaCore::Events::RemoveCallback(int id) {

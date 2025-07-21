@@ -52,7 +52,7 @@ namespace MetaCore::Engine {
     /// @brief Finds the path from a parent object to one of its children
     /// @param parent The starting point of the path in the hierarchy
     /// @param child The ending point of the path in the hierarchy
-    /// @return The names of the objects between parent and child separated by "/", or an empty string if child is not a child of parent
+    /// @return The names of the objects between parent and (including) child separated by "/", or an empty string if child is not a child of parent
     METACORE_EXPORT std::string GetTransformPath(TransformWrapper parent, TransformWrapper child);
     /// @brief Places a one child object a specific sibling amount away from another of its siblings
     /// @param child The object to move in the hierarchy
