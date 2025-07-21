@@ -46,6 +46,8 @@ namespace MetaCore::Internals {
     METACORE_EXPORT extern int bombsLeftHit;
     METACORE_EXPORT extern int bombsRightHit;
     METACORE_EXPORT extern int wallsHit;
+    METACORE_EXPORT extern int uncountedNotesLeftCut;
+    METACORE_EXPORT extern int uncountedNotesRightCut;
     METACORE_EXPORT extern int remainingNotesLeft;
     METACORE_EXPORT extern int remainingNotesRight;
     METACORE_EXPORT extern int songNotesLeft;

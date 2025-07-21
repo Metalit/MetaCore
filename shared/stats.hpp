@@ -27,13 +27,15 @@ namespace MetaCore::Stats {
     METACORE_EXPORT bool GetFullCombo(int saber);
     METACORE_EXPORT int GetMultiplier();
     METACORE_EXPORT float GetMultiplierProgress(bool allLevels);
+    METACORE_EXPORT int GetMultiplierProgressInt(bool allLevels);
     METACORE_EXPORT int GetMaxMultiplier();
     METACORE_EXPORT float GetMaxMultiplierProgress(bool allLevels);
+    METACORE_EXPORT int GetMaxMultiplierProgressInt(bool allLevels);
     METACORE_EXPORT float GetHealth();
     METACORE_EXPORT float GetSongTime();
     METACORE_EXPORT float GetSongLength();
     METACORE_EXPORT float GetSongSpeed();
-    METACORE_EXPORT int GetTotalNotes(int saber);
+    METACORE_EXPORT int GetTotalNotes(int saber, bool includeUncounted = false);
     METACORE_EXPORT int GetNotesCut(int saber);
     METACORE_EXPORT int GetNotesMissed(int saber);
     METACORE_EXPORT int GetNotesBadCut(int saber);

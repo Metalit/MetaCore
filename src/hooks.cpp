@@ -220,7 +220,9 @@ MAKE_AUTO_HOOK_MATCH(
 ) {
     CutScoreBuffer_HandleSaberSwingRatingCounterDidFinish(self, swingRatingCounter);
 
-    if (self->noteCutInfo.allIsOK && Stats::ShouldCountNote(self->noteCutInfo.noteData)) {
+    if (!self->noteCutInfo.allIsOK)
+        return;
+    if (Stats::ShouldCountNote(self->noteCutInfo.noteData)) {
         int after = self->afterCutScore;
         if (self->noteScoreDefinition->maxAfterCutScore == 0)  // TODO: selectively exclude from averages?
             after = 30;
@@ -237,6 +239,12 @@ MAKE_AUTO_HOOK_MATCH(
             Internals::rightAccuracy += self->centerDistanceCutScore;
             Internals::rightTimeDependence += std::abs(self->noteCutInfo.cutNormal.z);
         }
+        Events::Broadcast(Events::NoteCut);
+    } else if (!Stats::IsFakeNote(self->noteCutInfo.noteData)) {
+        if (self->noteCutInfo.saberType == SaberType::SaberA)
+            Internals::uncountedNotesLeftCut++;
+        else
+            Internals::uncountedNotesRightCut++;
         Events::Broadcast(Events::NoteCut);
     }
 }

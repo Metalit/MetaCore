@@ -76,8 +76,13 @@ int MetaCore::Stats::GetMultiplier() {
 }
 
 float MetaCore::Stats::GetMultiplierProgress(bool allLevels) {
+    float divisor = allLevels ? 2 + 4 + 8 : GetMultiplier() * 2;
+    return GetMultiplierProgressInt(allLevels) / divisor;
+}
+
+int MetaCore::Stats::GetMultiplierProgressInt(bool allLevels) {
     if (!allLevels)
-        return Internals::multiplierProgress / (float) (Internals::multiplier * 2);
+        return Internals::multiplierProgress;
     int previous = 0;
     if (Internals::multiplier == 8)
         previous = 2 + 4 + 8;
@@ -85,11 +90,11 @@ float MetaCore::Stats::GetMultiplierProgress(bool allLevels) {
         previous = 2 + 4;
     else if (Internals::multiplier == 2)
         previous = 2;
-    return (previous + Internals::multiplierProgress) / 14.0;
+    return previous + Internals::multiplierProgress;
 }
 
 int MetaCore::Stats::GetMaxMultiplier() {
-    int notes = GetTotalNotes(BothSabers);
+    int notes = GetTotalNotes(BothSabers, true);
     if (notes < 2)
         return 1;
     if (notes < 2 + 4)
@@ -100,16 +105,21 @@ int MetaCore::Stats::GetMaxMultiplier() {
 }
 
 float MetaCore::Stats::GetMaxMultiplierProgress(bool allLevels) {
-    int notes = GetTotalNotes(BothSabers);
+    float divisor = allLevels ? 2 + 4 + 8 : GetMaxMultiplier() * 2;
+    return GetMaxMultiplierProgressInt(allLevels) / divisor;
+}
+
+int MetaCore::Stats::GetMaxMultiplierProgressInt(bool allLevels) {
+    int notes = GetTotalNotes(BothSabers, true);
     if (allLevels)
-        return std::min(notes / 14.0, 1.0);
+        return std::min(notes, 14);
     if (notes >= 2 + 4 + 8)
-        return 1;
+        return 0;
     if (notes >= 2 + 4)
-        return (notes - 2 - 4) / 8.0;
+        return notes - 2 - 4;
     if (notes >= 2)
-        return (notes - 2) / 4.0;
-    return notes / 2.0;
+        return notes - 2;
+    return notes;
 }
 
 float MetaCore::Stats::GetHealth() {
@@ -128,12 +138,18 @@ float MetaCore::Stats::GetSongSpeed() {
     return Internals::songSpeed;
 }
 
-int MetaCore::Stats::GetTotalNotes(int saber) {
+int MetaCore::Stats::GetTotalNotes(int saber, bool includeUncounted) {
     int ret = 0;
-    if (IsLeft(saber))
+    if (IsLeft(saber)) {
         ret += Internals::notesLeftCut + Internals::notesLeftBadCut + Internals::notesLeftMissed;
-    if (IsRight(saber))
+        if (includeUncounted)
+            ret += Internals::uncountedNotesLeftCut;
+    }
+    if (IsRight(saber)) {
         ret += Internals::notesRightCut + Internals::notesRightBadCut + Internals::notesRightMissed;
+        if (includeUncounted)
+            ret += Internals::uncountedNotesRightCut;
+    }
     return ret;
 }
 

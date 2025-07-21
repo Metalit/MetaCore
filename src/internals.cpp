@@ -173,6 +173,8 @@ int Internals::notesRightMissed;
 int Internals::bombsLeftHit;
 int Internals::bombsRightHit;
 int Internals::wallsHit;
+int Internals::uncountedNotesLeftCut;
+int Internals::uncountedNotesRightCut;
 int Internals::remainingNotesLeft;
 int Internals::remainingNotesRight;
 int Internals::songNotesLeft;
@@ -282,6 +284,8 @@ void Internals::Initialize() {
     bombsLeftHit = 0;
     bombsRightHit = 0;
     wallsHit = 0;
+    uncountedNotesLeftCut = 0;
+    uncountedNotesRightCut = 0;
     auto pair = GetNoteCount(beatmapCallbacksUpdater, true);
     remainingNotesLeft = pair.first;
     songNotesLeft = pair.second;
