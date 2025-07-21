@@ -94,10 +94,11 @@ namespace MetaCore::Internals {
     METACORE_EXPORT extern bool stateValid;
     METACORE_EXPORT extern bool referencesValid;
     METACORE_EXPORT extern bool mapWasQuit;
+    METACORE_EXPORT extern bool mapWasRestarted;
 
     METACORE_EXPORT void Initialize();
     METACORE_EXPORT void DoSlowUpdate();
-    METACORE_EXPORT void Finish(bool quit);
+    METACORE_EXPORT void Finish(bool quit, bool restart);
 
     METACORE_EXPORT extern GlobalNamespace::BeatmapKey selectedKey;
     METACORE_EXPORT extern GlobalNamespace::BeatmapLevel* selectedLevel;
@@ -111,7 +112,8 @@ namespace MetaCore::Internals {
     METACORE_EXPORT void ClearPlaylist();
 
     METACORE_EXPORT void SetEndDragUI(UnityEngine::Component* component, std::function<void()> callback);
-    METACORE_EXPORT std::function<void()> SetKeyboardCloseUI(UnityEngine::Component* component, std::function<void()> onClosed, std::function<void()> onOk);
+    METACORE_EXPORT std::function<void()>
+    SetKeyboardCloseUI(UnityEngine::Component* component, std::function<void()> onClosed, std::function<void()> onOk);
 
     METACORE_EXPORT bool IsAprilFirst();
 }

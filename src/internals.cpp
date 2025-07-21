@@ -220,6 +220,7 @@ Camera* Internals::mainCamera;
 bool Internals::stateValid = false;
 bool Internals::referencesValid = false;
 bool Internals::mapWasQuit = false;
+bool Internals::mapWasRestarted = false;
 
 void Internals::Initialize() {
     auto beatmapCallbacksUpdater = Object::FindObjectOfType<BeatmapCallbacksUpdater*>(true);
@@ -354,10 +355,11 @@ void Internals::DoSlowUpdate() {
     }
 }
 
-void Internals::Finish(bool quit) {
+void Internals::Finish(bool quit, bool restart) {
     stateValid = false;
     referencesValid = false;
     mapWasQuit = quit;
+    mapWasRestarted = restart;
 }
 
 BeatmapKey Internals::selectedKey = {};

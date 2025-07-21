@@ -67,7 +67,17 @@ static void CheckInitialize(UnityW<ScenesTransitionSetupDataSO> scene) {
     inGameplayScene = true;
 }
 
-static void CheckFinish() {
+static void CheckEarlyFinish(LevelCompletionResults::LevelEndAction action) {
+    if (!inGameplayScene)
+        return;
+    Internals::Finish(action == LevelCompletionResults::LevelEndAction::Quit, action == LevelCompletionResults::LevelEndAction::Restart);
+    if (Internals::mapWasRestarted)
+        Events::Broadcast(Events::MapRestarted);
+    else
+        Events::Broadcast(Events::MapEnded);
+}
+
+static void CheckSceneFinish() {
     if (!inGameplayScene)
         return;
     logger.debug("gameplay scene finish");
@@ -359,13 +369,7 @@ MAKE_AUTO_HOOK_MATCH(
     LevelCompletionResults* levelCompletionResults
 ) {
     logger.info("standard level end {}", (int) levelCompletionResults->levelEndAction);
-
-    Internals::Finish(levelCompletionResults->levelEndAction == LevelCompletionResults::LevelEndAction::Quit);
-
-    if (levelCompletionResults->levelEndAction == LevelCompletionResults::LevelEndAction::Restart)
-        Events::Broadcast(Events::MapRestarted);
-    else
-        Events::Broadcast(Events::MapEnded);
+    CheckEarlyFinish(levelCompletionResults->levelEndAction);
 
     MenuTransitionsHelper_HandleMainGameSceneDidFinish(self, standardLevelScenesTransitionSetupData, levelCompletionResults);
 }
@@ -380,13 +384,7 @@ MAKE_AUTO_HOOK_MATCH(
     MissionCompletionResults* missionCompletionResults
 ) {
     logger.info("campaign level end {}", (int) missionCompletionResults->levelCompletionResults->levelEndAction);
-
-    Internals::Finish(missionCompletionResults->levelCompletionResults->levelEndAction == LevelCompletionResults::LevelEndAction::Quit);
-
-    if (missionCompletionResults->levelCompletionResults->levelEndAction == LevelCompletionResults::LevelEndAction::Restart)
-        Events::Broadcast(Events::MapRestarted);
-    else
-        Events::Broadcast(Events::MapEnded);
+    CheckEarlyFinish(missionCompletionResults->levelCompletionResults->levelEndAction);
 
     MenuTransitionsHelper_HandleMissionLevelSceneDidFinish(self, missionLevelScenesTransitionSetupData, missionCompletionResults);
 }
@@ -401,8 +399,7 @@ MAKE_AUTO_HOOK_MATCH(
     MultiplayerResultsData* multiplayerResultsData
 ) {
     logger.info("multiplayer level end");
-    Internals::Finish(false);
-    Events::Broadcast(Events::MapEnded);
+    CheckEarlyFinish(LevelCompletionResults::LevelEndAction::None);
 
     MenuTransitionsHelper_HandleMultiplayerLevelDidFinish(self, multiplayerLevelScenesTransitionSetupData, multiplayerResultsData);
 }
@@ -417,8 +414,7 @@ MAKE_AUTO_HOOK_MATCH(
     DisconnectedReason disconnectedReason
 ) {
     logger.info("multiplayer level disconnect");
-    Internals::Finish(true);
-    Events::Broadcast(Events::MapEnded);
+    CheckEarlyFinish(LevelCompletionResults::LevelEndAction::Quit);
 
     MenuTransitionsHelper_HandleMultiplayerLevelDidDisconnect(self, multiplayerLevelScenesTransitionSetupData, disconnectedReason);
 }
@@ -431,7 +427,7 @@ MAKE_AUTO_HOOK_MATCH(
     GameScenesManager::__c__DisplayClass41_0* self,
     Zenject::DiContainer* container
 ) {
-    CheckFinish();
+    CheckSceneFinish();
 
     GameScenesManager_PopScenes_Delegate(self, container);
 }
@@ -444,7 +440,7 @@ MAKE_AUTO_HOOK_MATCH(
     GameScenesManager::__c__DisplayClass42_0* self,
     Zenject::DiContainer* container
 ) {
-    CheckFinish();
+    CheckSceneFinish();
 
     GameScenesManager_ReplaceScenes_Delegate_AfterUnload(self, container);
 }
