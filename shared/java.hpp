@@ -9,7 +9,7 @@ namespace MetaCore::Java {
         /// @brief Constructor that allocates a frame of a given size
         /// @param env The JNIEnv instance for the thread
         /// @param size The amount of space to reserve on the frame
-        JNIFrame(JNIEnv* env, int size) : env(env) { env->PushLocalFrame(size); }
+        JNIFrame(JNIEnv* env, int size = 0) : env(env) { env->PushLocalFrame(size); }
         /// @brief Destructor that frees the allocated frame if not already freed
         ~JNIFrame() { pop(); }
 
@@ -38,7 +38,7 @@ namespace MetaCore::Java {
     /// @brief Creates a new instance of the provided java class
     /// @param env The JNIEnv instance for the thread
     /// @param clazz The information to find the class of the method
-    /// @param init The signature of the class constructor method
+    /// @param init The signature of the class constructor method (will return void)
     /// @param ... The arguments for the constructor
     /// @return The created java class instance, or nullptr if it failed
     METACORE_EXPORT jobject NewObject(JNIEnv* env, FindClass clazz, std::string init, ...);
@@ -83,13 +83,25 @@ namespace MetaCore::Java {
     /// @return The c++ version of the string
     METACORE_EXPORT std::string ConvertString(JNIEnv* env, jstring string);
 
+    /// @brief Returns the result of the java toString method on the object
+    /// @param env The JNIEnv instance for the thread
+    /// @param string The java object
+    /// @return The c++ string representation of the object
+    METACORE_EXPORT std::string ToString(JNIEnv* env, jobject object);
+
     /// @brief Gets the name of a java class
     /// @param env The JNIEnv instance for the thread
     /// @param clazz The java class
     /// @return The java class name
     METACORE_EXPORT std::string GetClassName(JNIEnv* env, jclass clazz);
 
-#define SPECIALIZATION(type)                                                                   \
+    /// @brief Gets the class, error message, and stack trace of a java exception
+    /// @param env The JNIEnv instance for the thread
+    /// @param error The java exception, or throwable of any kind
+    /// @return The description of the exception
+    METACORE_EXPORT std::string DescribeError(JNIEnv* env, jthrowable error);
+
+#define SPECIALIZATION(type)                                                                                \
     extern template METACORE_EXPORT type RunMethod(JNIEnv* env, FindClass clazz, FindMethodID method, ...); \
     extern template METACORE_EXPORT type GetField(JNIEnv* env, FindClass clazz, FindFieldID field);         \
     extern template METACORE_EXPORT void SetField(JNIEnv* env, FindClass clazz, FindFieldID field, type value);
