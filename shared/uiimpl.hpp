@@ -120,7 +120,7 @@ inline void MetaCore::UI::AddIncrementIncrement(BSML::IncrementSetting* setting,
     auto currentPos = transform->anchoredPosition;
     transform->anchoredPosition = {currentPos.x - 6, currentPos.y};
 
-    auto leftButton = BSML::Lite::CreateUIButton(transform, "", "DecButton", {-20, 0}, {6, 8}, [setting, increment]() {
+    auto leftButton = BSML::Lite::CreateUIButton(transform, "", "DecButton", {-7, 0}, {7, 8}, [setting, increment]() {
         setting->currentValue -= increment;
         setting->EitherPressed();
     });
