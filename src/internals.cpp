@@ -245,10 +245,23 @@ void Internals::Initialize() {
     beatmapCallbacksController = beatmapCallbacksUpdater ? beatmapCallbacksUpdater->_beatmapCallbacksController : nullptr;
     beatmapObjectManager = scoreController ? scoreController->_beatmapObjectManager : nullptr;
     comboController = Object::FindObjectOfType<ComboController*>(true);
+    gameEnergyCounter = scoreController ? il2cpp_utils::try_cast<GameEnergyCounter>(scoreController->_gameEnergyCounter).value_or(nullptr) : nullptr;
     saberManager = Object::FindObjectOfType<SaberManager*>(true);
     mainCamera = Camera::get_main();
 
-    referencesValid = setupData && scoreController && beatmapCallbacksUpdater && comboController && saberManager && mainCamera;
+    referencesValid = setupData && scoreController && beatmapCallbacksUpdater && comboController && gameEnergyCounter && saberManager && mainCamera;
+
+    if (!referencesValid)
+        logger.critical(
+            "Not all expected references were found! Got: {} {} {} {} {} {} {}",
+            (bool) setupData,
+            (bool) scoreController,
+            (bool) beatmapCallbacksUpdater,
+            (bool) comboController,
+            (bool) gameEnergyCounter,
+            (bool) saberManager,
+            (bool) mainCamera
+        );
 
     if (scoreController)
         scoreController->add_multiplierDidChangeEvent(Delegates::MakeSystemAction([](int mult, float normalizedProgress) {
