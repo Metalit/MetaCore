@@ -453,6 +453,20 @@ MAKE_AUTO_HOOK_MATCH(
     GameScenesManager_ReplaceScenes_Delegate_AfterUnload(self, container);
 }
 
+// handle soft restart
+MAKE_AUTO_HOOK_MATCH(
+    MenuTransitionsHelper_RestartGame,
+    &MenuTransitionsHelper::RestartGame,
+    void,
+    MenuTransitionsHelper* self,
+    System::Action_1<Zenject::DiContainer*>* finishCallback
+) {
+    logger.info("soft restart");
+    Events::Broadcast(Events::SoftRestart);
+
+    MenuTransitionsHelper_RestartGame(self, finishCallback);
+}
+
 // prevent score submission in solo and multiplayer mode
 MAKE_AUTO_HOOK_MATCH(
     LevelCompletionResultsHelper_ProcessScore,
@@ -470,7 +484,7 @@ MAKE_AUTO_HOOK_MATCH(
             beatmapKey, playerData, playerLevelStats, levelCompletionResults, transformedBeatmapData, platformLeaderboardsModel
         );
     else
-        logger.info("Disabling submission of score");
+        logger.info("disabling submission of score");
 }
 
 // prevent score submission in party mode

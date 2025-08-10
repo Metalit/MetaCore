@@ -50,7 +50,9 @@ namespace MetaCore::Events {
         GameplaySceneEnded,
         // After the score submission status changes
         ScoreSubmission,
-        EventMax = ScoreSubmission,
+        // Immediately when the game does a soft or internal restart
+        SoftRestart,
+        EventMax = SoftRestart,
     };
 
     /// @brief Registers a custom event for future broadcasts
