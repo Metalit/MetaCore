@@ -348,7 +348,7 @@ void Internals::Initialize() {
 }
 
 void Internals::DoSlowUpdate() {
-    if (!stateValid)
+    if (!referencesValid)
         return;
 
     timeSinceSlowUpdate += Time::get_deltaTime();
