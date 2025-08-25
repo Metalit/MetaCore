@@ -696,3 +696,17 @@ AUTO_INSTALL_FUNCTION(Abort) {
     auto abort_address = dlsym(libc, "abort");
     INSTALL_HOOK_DIRECT(logger, Abort, abort_address);
 }
+
+// hook abort and provide backtraces
+MAKE_HOOK(delete_object_internal_step1, nullptr, void, char* object) {
+    int instanceId = *(int*) (object + 8);
+    auto destroy = ObjectSignal::onDestroys.find(instanceId);
+    if (destroy != ObjectSignal::onDestroys.end() && destroy->second)
+        destroy->second();
+    delete_object_internal_step1(object);
+}
+
+AUTO_INSTALL_FUNCTION(delete_object_internal_step1) {
+    uintptr_t addr = baseAddr("libunity.so") + 0x8d2898;
+    INSTALL_HOOK_DIRECT(logger, delete_object_internal_step1, (void*) addr);
+}

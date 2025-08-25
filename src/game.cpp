@@ -50,9 +50,7 @@ static FadeInOutController* GetFadeInOut() {
     if (!fadeInOutController) {
         fadeInOutController = UnityEngine::Resources::FindObjectsOfTypeAll<FadeInOutController*>()->FirstOrDefault();
         if (fadeInOutController)
-            MetaCore::Engine::GetOrAddComponent<MetaCore::ObjectSignal*>(fadeInOutController)->onDestroy = []() {
-                fadeInOutController = nullptr;
-            };
+            MetaCore::Engine::SetOnDestroy(fadeInOutController, []() { fadeInOutController = nullptr; });
     }
     if (!fadeInOutController)
         logger.warn("GetFadeInOut returning null");
@@ -122,9 +120,7 @@ MenuTransitionsHelper* MetaCore::Game::GetMenuTransitionsHelper() {
     if (!menuTransitionsHelper) {
         menuTransitionsHelper = UnityEngine::Resources::FindObjectsOfTypeAll<MenuTransitionsHelper*>()->FirstOrDefault();
         if (menuTransitionsHelper)
-            Engine::GetOrAddComponent<ObjectSignal*>(menuTransitionsHelper)->onDestroy = []() {
-                menuTransitionsHelper = nullptr;
-            };
+            Engine::SetOnDestroy(menuTransitionsHelper, []() { menuTransitionsHelper = nullptr; });
     }
     if (!menuTransitionsHelper)
         logger.warn("GetMenuTransitionsHelper returning null");
@@ -136,9 +132,7 @@ MainFlowCoordinator* MetaCore::Game::GetMainFlowCoordinator() {
     if (!mainFlowCoordinator) {
         mainFlowCoordinator = UnityEngine::Resources::FindObjectsOfTypeAll<MainFlowCoordinator*>()->FirstOrDefault();
         if (mainFlowCoordinator)
-            Engine::GetOrAddComponent<ObjectSignal*>(mainFlowCoordinator)->onDestroy = []() {
-                mainFlowCoordinator = nullptr;
-            };
+            Engine::SetOnDestroy(mainFlowCoordinator, []() { mainFlowCoordinator = nullptr; });
     }
     if (!mainFlowCoordinator)
         logger.warn("GetMainFlowCoordinator returning null");
@@ -150,9 +144,7 @@ MainSystemInit* MetaCore::Game::GetMainSystemInit() {
     if (!mainSystemInit) {
         mainSystemInit = UnityEngine::Resources::FindObjectsOfTypeAll<MainSystemInit*>()->FirstOrDefault();
         if (mainSystemInit)
-            Engine::GetOrAddComponent<ObjectSignal*>(mainSystemInit)->onDestroy = []() {
-                mainSystemInit = nullptr;
-            };
+            Engine::SetOnDestroy(mainSystemInit, []() { mainSystemInit = nullptr; });
     }
     if (!mainSystemInit)
         logger.warn("GetMainSystemInit returning null");
@@ -166,9 +158,7 @@ Zenject::DiContainer* MetaCore::Game::GetAppDiContainer() {
     if (!appSceneContext) {
         appSceneContext = UnityEngine::GameObject::Find("AppCoreSceneContext");
         if (appSceneContext)
-            Engine::GetOrAddComponent<ObjectSignal*>(appSceneContext)->onDestroy = []() {
-                appSceneContext = nullptr;
-            };
+            Engine::SetOnDestroy(appSceneContext, []() { appSceneContext = nullptr; });
     }
     auto container = appSceneContext ? appSceneContext->GetComponent<Zenject::SceneContext*>()->_container : nullptr;
     if (!container)

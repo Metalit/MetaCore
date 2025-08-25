@@ -1,10 +1,10 @@
 #include "main.hpp"
 
 #include "UnityEngine/GameObject.hpp"
-#include "hooks.hpp"
-#include "scotland2/shared/modloader.h"
-#include "input.hpp"
 #include "events.hpp"
+#include "hooks.hpp"
+#include "input.hpp"
+#include "scotland2/shared/modloader.h"
 #include "types.hpp"
 
 static modloader::ModInfo modInfo = {MOD_ID, VERSION, 0};

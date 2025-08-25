@@ -186,7 +186,7 @@ void MetaCore::Engine::SetOnDisable(TransformWrapper object, std::function<void(
 }
 
 void MetaCore::Engine::SetOnDestroy(TransformWrapper object, std::function<void()> callback) {
-    GetOrAddComponent<ObjectSignal*>(object)->onDestroy = std::move(callback);
+    ObjectSignal::onDestroys[object->gameObject->GetInstanceID()] = callback;
 }
 
 void MetaCore::Engine::ScheduleOnUpdate(std::function<void()> callback) {

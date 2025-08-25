@@ -14,12 +14,12 @@ DECLARE_CLASS_CODEGEN(MetaCore, ObjectSignal, UnityEngine::MonoBehaviour) {
 
     DECLARE_INSTANCE_METHOD(void, OnEnable);
     DECLARE_INSTANCE_METHOD(void, OnDisable);
-    DECLARE_INSTANCE_METHOD(void, OnDestroy);
 
    public:
     std::function<void()> onEnable = nullptr;
     std::function<void()> onDisable = nullptr;
-    std::function<void()> onDestroy = nullptr;
+
+    static std::unordered_map<int, std::function<void()>> onDestroys;
 };
 
 DECLARE_CLASS_CODEGEN_INTERFACES(MetaCore, EndDragHandler, UnityEngine::MonoBehaviour, UES::IEventSystemHandler*, UES::IPointerUpHandler*) {

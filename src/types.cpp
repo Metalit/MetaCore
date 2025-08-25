@@ -5,6 +5,8 @@ DEFINE_TYPE(MetaCore, EndDragHandler);
 DEFINE_TYPE(MetaCore, KeyboardCloseHandler);
 DEFINE_TYPE(MetaCore, MainThreadScheduler);
 
+std::unordered_map<int, std::function<void()>> MetaCore::ObjectSignal::onDestroys;
+
 void MetaCore::ObjectSignal::OnEnable() {
     if (onEnable)
         onEnable();
@@ -13,11 +15,6 @@ void MetaCore::ObjectSignal::OnEnable() {
 void MetaCore::ObjectSignal::OnDisable() {
     if (onDisable)
         onDisable();
-}
-
-void MetaCore::ObjectSignal::OnDestroy() {
-    if (onDestroy)
-        onDestroy();
 }
 
 void MetaCore::EndDragHandler::OnPointerUp(UnityEngine::EventSystems::PointerEventData* eventData) {
