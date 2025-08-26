@@ -94,7 +94,7 @@ int MetaCore::Stats::GetMultiplierProgressInt(bool allLevels) {
 }
 
 int MetaCore::Stats::GetMaxMultiplier() {
-    int notes = GetTotalNotes(BothSabers, true);
+    int notes = GetTotalNotes(BothSabers);
     if (notes < 2)
         return 1;
     if (notes < 2 + 4)
@@ -110,7 +110,7 @@ float MetaCore::Stats::GetMaxMultiplierProgress(bool allLevels) {
 }
 
 int MetaCore::Stats::GetMaxMultiplierProgressInt(bool allLevels) {
-    int notes = GetTotalNotes(BothSabers, true);
+    int notes = GetTotalNotes(BothSabers);
     if (allLevels)
         return std::min(notes, 14);
     if (notes >= 2 + 4 + 8)
@@ -138,18 +138,12 @@ float MetaCore::Stats::GetSongSpeed() {
     return Internals::songSpeed;
 }
 
-int MetaCore::Stats::GetTotalNotes(int saber, bool includeUncounted) {
+int MetaCore::Stats::GetTotalNotes(int saber) {
     int ret = 0;
-    if (IsLeft(saber)) {
-        ret += Internals::notesLeftCut + Internals::notesLeftBadCut + Internals::notesLeftMissed;
-        if (includeUncounted)
-            ret += Internals::uncountedNotesLeftCut;
-    }
-    if (IsRight(saber)) {
-        ret += Internals::notesRightCut + Internals::notesRightBadCut + Internals::notesRightMissed;
-        if (includeUncounted)
-            ret += Internals::uncountedNotesRightCut;
-    }
+    if (IsLeft(saber))
+        ret += Internals::notesLeftCut + Internals::notesLeftBadCut + Internals::notesLeftMissed + Internals::uncountedNotesLeftCut;
+    if (IsRight(saber))
+        ret += Internals::notesRightCut + Internals::notesRightBadCut + Internals::notesRightMissed + Internals::uncountedNotesRightCut;
     return ret;
 }
 
@@ -199,6 +193,15 @@ int MetaCore::Stats::GetSongNotes(int saber) {
         ret += Internals::songNotesLeft;
     if (IsRight(saber))
         ret += Internals::songNotesRight;
+    return ret;
+}
+
+int MetaCore::Stats::GetNotesRemaining(int saber) {
+    int ret = 0;
+    if (IsLeft(saber))
+        ret += Internals::remainingNotesLeft;
+    if (IsRight(saber))
+        ret += Internals::remainingNotesRight;
     return ret;
 }
 

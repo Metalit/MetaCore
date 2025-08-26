@@ -35,13 +35,14 @@ namespace MetaCore::Stats {
     METACORE_EXPORT float GetSongTime();
     METACORE_EXPORT float GetSongLength();
     METACORE_EXPORT float GetSongSpeed();
-    METACORE_EXPORT int GetTotalNotes(int saber, bool includeUncounted = false);
+    METACORE_EXPORT int GetTotalNotes(int saber);
     METACORE_EXPORT int GetNotesCut(int saber);
     METACORE_EXPORT int GetNotesMissed(int saber);
     METACORE_EXPORT int GetNotesBadCut(int saber);
     METACORE_EXPORT int GetBombsHit(int saber);
     METACORE_EXPORT int GetWallsHit();
     METACORE_EXPORT int GetSongNotes(int saber);
+    METACORE_EXPORT int GetNotesRemaining(int saber);
     METACORE_EXPORT float GetPreSwing(int saber);
     METACORE_EXPORT float GetPostSwing(int saber);
     METACORE_EXPORT float GetAccuracy(int saber);
