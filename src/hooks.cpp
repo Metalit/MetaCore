@@ -701,8 +701,10 @@ AUTO_INSTALL_FUNCTION(Abort) {
 MAKE_HOOK(delete_object_internal_step1, nullptr, void, char* object) {
     int instanceId = *(int*) (object + 8);
     auto destroy = ObjectSignal::onDestroys.find(instanceId);
-    if (destroy != ObjectSignal::onDestroys.end() && destroy->second)
+    if (destroy != ObjectSignal::onDestroys.end() && destroy->second) {
         destroy->second();
+        ObjectSignal::onDestroys.erase(destroy);
+    }
     delete_object_internal_step1(object);
 }
 
