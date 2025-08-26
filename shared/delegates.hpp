@@ -89,4 +89,8 @@ namespace MetaCore::Delegates {
     auto MakeUnityAction(T fun) {
         return MakeUnityAction(std::function(fun));
     }
+
+    inline bool SafeIsNull(System::MulticastDelegate* delegate) {
+        return System::MulticastDelegate::op_Equality(delegate, nullptr);
+    }
 }
