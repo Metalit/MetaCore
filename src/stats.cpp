@@ -147,12 +147,18 @@ int MetaCore::Stats::GetTotalNotes(int saber) {
     return ret;
 }
 
-int MetaCore::Stats::GetNotesCut(int saber) {
+int MetaCore::Stats::GetNotesCut(int saber, bool includeUncounted) {
     int ret = 0;
-    if (IsLeft(saber))
+    if (IsLeft(saber)) {
         ret += Internals::notesLeftCut;
-    if (IsRight(saber))
+        if (includeUncounted)
+            ret += Internals::uncountedNotesLeftCut;
+    }
+    if (IsRight(saber)) {
         ret += Internals::notesRightCut;
+        if (includeUncounted)
+            ret += Internals::uncountedNotesRightCut;
+    }
     return ret;
 }
 
