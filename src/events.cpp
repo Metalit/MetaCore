@@ -12,6 +12,24 @@ static MetaCore::IndexMap<std::tuple<bool, int, int>> registrations = {};
 
 static int maxEvent = (int) MetaCore::Events::EventMax;
 
+struct EventGuard {
+    bool Guard(int newEvent) {
+        if (events.contains(newEvent))
+            return false;
+        events.emplace(newEvent);
+        event = newEvent;
+        return true;
+    }
+    ~EventGuard() {
+        if (event >= 0)
+            events.erase(event);
+    }
+
+   private:
+    int event = -1;
+    static inline std::set<int> events = {};
+};
+
 int MetaCore::Events::RegisterEvent(std::string mod, int event) {
     if (!customEvents.contains(mod))
         customEvents[mod] = {};
@@ -93,8 +111,14 @@ static inline void SafeCallCallbacks(MetaCore::IndexMap<std::function<void(Ts...
 bool MetaCore::Events::Broadcast(int event) {
     if (event < 0 || event > maxEvent)
         return false;
-    SafeCallCallbacks(globalCallbacks, event);
 
+    EventGuard guard;
+    if (!guard.Guard(event)) {
+        logger.error("Event {} was broadcast even though it was already being run!", event);
+        return false;
+    }
+
+    SafeCallCallbacks(globalCallbacks, event);
     if (callbacks.contains(event))
         SafeCallCallbacks(callbacks[event]);
 
