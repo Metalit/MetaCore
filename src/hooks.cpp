@@ -211,6 +211,36 @@ MAKE_AUTO_HOOK_MATCH(
 }
 
 // update swing statistics
+static void HandleCutFinish(CutScoreBuffer* buffer) {
+    if (!buffer->noteCutInfo.allIsOK)
+        return;
+    if (Stats::ShouldCountNote(buffer->noteCutInfo.noteData)) {
+        int after = buffer->afterCutScore;
+        if (buffer->noteScoreDefinition->maxAfterCutScore == 0)  // TODO: selectively exclude from averages?
+            after = 30;
+        if (buffer->noteCutInfo.saberType == SaberType::SaberA) {
+            Internals::notesLeftCut++;
+            Internals::leftPreSwing += buffer->beforeCutScore;
+            Internals::leftPostSwing += after;
+            Internals::leftAccuracy += buffer->centerDistanceCutScore;
+            Internals::leftTimeDependence += std::abs(buffer->noteCutInfo.cutNormal.z);
+        } else {
+            Internals::notesRightCut++;
+            Internals::rightPreSwing += buffer->beforeCutScore;
+            Internals::rightPostSwing += after;
+            Internals::rightAccuracy += buffer->centerDistanceCutScore;
+            Internals::rightTimeDependence += std::abs(buffer->noteCutInfo.cutNormal.z);
+        }
+        Events::Broadcast(Events::NoteCut);
+    } else if (!Stats::IsFakeNote(buffer->noteCutInfo.noteData)) {
+        if (buffer->noteCutInfo.saberType == SaberType::SaberA)
+            Internals::uncountedNotesLeftCut++;
+        else
+            Internals::uncountedNotesRightCut++;
+        Events::Broadcast(Events::NoteCut);
+    }
+}
+
 MAKE_AUTO_HOOK_MATCH(
     CutScoreBuffer_HandleSaberSwingRatingCounterDidFinish,
     &CutScoreBuffer::HandleSaberSwingRatingCounterDidFinish,
@@ -219,34 +249,14 @@ MAKE_AUTO_HOOK_MATCH(
     ISaberSwingRatingCounter* swingRatingCounter
 ) {
     CutScoreBuffer_HandleSaberSwingRatingCounterDidFinish(self, swingRatingCounter);
+    HandleCutFinish(self);
+}
 
-    if (!self->noteCutInfo.allIsOK)
-        return;
-    if (Stats::ShouldCountNote(self->noteCutInfo.noteData)) {
-        int after = self->afterCutScore;
-        if (self->noteScoreDefinition->maxAfterCutScore == 0)  // TODO: selectively exclude from averages?
-            after = 30;
-        if (self->noteCutInfo.saberType == SaberType::SaberA) {
-            Internals::notesLeftCut++;
-            Internals::leftPreSwing += self->beforeCutScore;
-            Internals::leftPostSwing += after;
-            Internals::leftAccuracy += self->centerDistanceCutScore;
-            Internals::leftTimeDependence += std::abs(self->noteCutInfo.cutNormal.z);
-        } else {
-            Internals::notesRightCut++;
-            Internals::rightPreSwing += self->beforeCutScore;
-            Internals::rightPostSwing += after;
-            Internals::rightAccuracy += self->centerDistanceCutScore;
-            Internals::rightTimeDependence += std::abs(self->noteCutInfo.cutNormal.z);
-        }
-        Events::Broadcast(Events::NoteCut);
-    } else if (!Stats::IsFakeNote(self->noteCutInfo.noteData)) {
-        if (self->noteCutInfo.saberType == SaberType::SaberA)
-            Internals::uncountedNotesLeftCut++;
-        else
-            Internals::uncountedNotesRightCut++;
-        Events::Broadcast(Events::NoteCut);
-    }
+MAKE_AUTO_HOOK_MATCH(CutScoreBuffer_Init, &CutScoreBuffer::Init, bool, CutScoreBuffer* self, ByRef<NoteCutInfo> noteCutInfo) {
+    bool notYetFinished = CutScoreBuffer_Init(self, noteCutInfo);
+    if (!notYetFinished)
+        HandleCutFinish(self);
+    return notYetFinished;
 }
 
 // update combo and walls hit
