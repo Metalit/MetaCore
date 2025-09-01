@@ -30,21 +30,21 @@ struct EventGuard {
     static inline std::set<int> events = {};
 };
 
-int MetaCore::Events::RegisterEvent(std::string mod, int event) {
+int MetaCore::Events::RegisterEvent(std::string mod, int modEvent) {
     if (!customEvents.contains(mod))
         customEvents[mod] = {};
-    else if (customEvents[mod].contains(event))
+    else if (customEvents[mod].contains(modEvent))
         return -1;
-    customEvents[mod][event] = ++maxEvent;
+    customEvents[mod][modEvent] = ++maxEvent;
     return maxEvent;
 }
 
-int MetaCore::Events::FindEvent(std::string mod, int event) {
+int MetaCore::Events::FindEvent(std::string mod, int modEvent) {
     if (!customEvents.contains(mod))
         return -1;
-    if (!customEvents[mod].contains(event))
+    if (!customEvents[mod].contains(modEvent))
         return -1;
-    return customEvents[mod][event];
+    return customEvents[mod][modEvent];
 }
 
 template <bool Global, class... Ts>
@@ -80,8 +80,8 @@ int MetaCore::Events::AddCallback(int event, std::function<void()> callback, boo
     return AddCallbackImpl<false>(std::move(callback), once, event);
 }
 
-int MetaCore::Events::AddCallback(std::string mod, int event, std::function<void()> callback, bool once) {
-    return AddCallback(FindEvent(mod, event), std::move(callback), once);
+int MetaCore::Events::AddCallback(std::string mod, int modEvent, std::function<void()> callback, bool once) {
+    return AddCallback(FindEvent(mod, modEvent), std::move(callback), once);
 }
 
 int MetaCore::Events::AddCallback(std::function<void(int)> callback, bool once) {
@@ -125,10 +125,10 @@ bool MetaCore::Events::Broadcast(int event) {
     return true;
 }
 
-bool MetaCore::Events::Broadcast(std::string mod, int event) {
+bool MetaCore::Events::Broadcast(std::string mod, int modEvent) {
     if (!customEvents.contains(mod))
         return false;
-    if (!customEvents[mod].contains(event))
+    if (!customEvents[mod].contains(modEvent))
         return false;
-    return Broadcast(customEvents[mod][event]);
+    return Broadcast(customEvents[mod][modEvent]);
 }

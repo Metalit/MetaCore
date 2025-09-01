@@ -57,15 +57,15 @@ namespace MetaCore::Events {
 
     /// @brief Registers a custom event for future broadcasts
     /// @param mod The unique id of the mod registering the event
-    /// @param event The per-mod id of the event being registered
+    /// @param modEvent The per-mod id of the event being registered
     /// @return The unique global id of the registered event (> EventMax), or -1 on failure
-    METACORE_EXPORT int RegisterEvent(std::string mod, int event);
+    METACORE_EXPORT int RegisterEvent(std::string mod, int modEvent);
 
     /// @brief Finds the unique global id of a custom event
     /// @param mod The unique id of the mod that registered the event
-    /// @param event The per-mod id of the registered event
+    /// @param modEvent The per-mod id of the registered event
     /// @return The unique global id of the event, or -1 if it does not exist
-    METACORE_EXPORT int FindEvent(std::string mod, int event);
+    METACORE_EXPORT int FindEvent(std::string mod, int modEvent);
 
     /// @brief Registers a callback to an event
     /// @param event The global id of the event
@@ -75,11 +75,11 @@ namespace MetaCore::Events {
     METACORE_EXPORT int AddCallback(int event, std::function<void()> callback, bool once = false);
     /// @brief Registers a callback to an event
     /// @param mod The unique id of the mod that registered the event
-    /// @param event The per-mod id of the event
+    /// @param modEvent The per-mod id of the event
     /// @param callback The function to be called when the event is broadcast
     /// @param once If the callback should only be called once and then removed
     /// @return The id for removal if the event was successfully registered to (>= 0), or -1 on failure
-    METACORE_EXPORT int AddCallback(std::string mod, int event, std::function<void()> callback, bool once = false);
+    METACORE_EXPORT int AddCallback(std::string mod, int modEvent, std::function<void()> callback, bool once = false);
     /// @brief Registers a callback to all events that will be called before event-specific callbacks
     /// @param callback The function to be called with the global id of any broadcast event
     /// @param once If the callback should only be called once and then removed
@@ -96,9 +96,9 @@ namespace MetaCore::Events {
     METACORE_EXPORT bool Broadcast(int event);
     /// @brief Globally broadcasts an event
     /// @param mod The unique id of the mod that registered the event
-    /// @param event The per-mod id of the event
+    /// @param modEvent The per-mod id of the event
     /// @return If the event was successfully broadcast
-    METACORE_EXPORT bool Broadcast(std::string mod, int event);
+    METACORE_EXPORT bool Broadcast(std::string mod, int modEvent);
 }
 
 #define CONCAT_WRAPPED(x, y) x##y
