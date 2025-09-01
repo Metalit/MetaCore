@@ -630,7 +630,7 @@ static custom_types::Helpers::Coroutine DelayCallback(System::Action* callback, 
 }
 
 // redirect fade in through our system
-MAKE_AUTO_HOOK_MATCH(
+MAKE_AUTO_ORIG_HOOK_MATCH(
     FadeInOutController_FadeIn,
     static_cast<void (FadeInOutController::*)(float, System::Action*)>(&FadeInOutController::FadeIn),
     void,
@@ -648,7 +648,7 @@ MAKE_AUTO_HOOK_MATCH(
 }
 
 // redirect fade out through our system
-MAKE_AUTO_HOOK_MATCH(
+MAKE_AUTO_ORIG_HOOK_MATCH(
     FadeInOutController_FadeOut,
     static_cast<void (FadeInOutController::*)(float, System::Action*)>(&FadeInOutController::FadeOut),
     void,
