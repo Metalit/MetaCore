@@ -54,6 +54,8 @@ using namespace MetaCore;
 
 static bool inGameplayScene = false;
 
+static std::set<int> pressedButtons;
+
 static bool IsGameplayScene(UnityW<ScenesTransitionSetupDataSO> scene) {
     return scene && scene.try_cast<LevelScenesTransitionSetupDataSO>();
 }
@@ -577,8 +579,18 @@ MAKE_AUTO_HOOK_MATCH(OVRInput_Update, &OVRInput::Update, void) {
     OVRInput_Update();
 
     for (int i = 0; i <= Input::ButtonsMax; i++) {
-        if (Input::GetPressed(Input::Either, (Input::Buttons) i))
-            Events::Broadcast(Input::ButtonEvents, i);
+        bool pressed = Input::GetPressed(Input::Either, (Input::Buttons) i);
+        bool wasPressed = pressedButtons.contains(i);
+        if (pressed && !wasPressed) {
+            Events::Broadcast(Input::PressEvents, i);
+            pressedButtons.emplace(i);
+        }
+        if (pressed)
+            Events::Broadcast(Input::HoldEvents, i);
+        if (!pressed && wasPressed) {
+            Events::Broadcast(Input::ReleaseEvents, i);
+            pressedButtons.erase(i);
+        }
     }
 }
 

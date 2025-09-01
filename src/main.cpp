@@ -10,8 +10,11 @@
 static modloader::ModInfo modInfo = {MOD_ID, VERSION, 0};
 
 static void RegisterButtonEvents() {
-    for (int i = 0; i <= MetaCore::Input::ButtonsMax; i++)
-        MetaCore::Events::RegisterEvent(MetaCore::Input::ButtonEvents, i);
+    for (int i = 0; i <= MetaCore::Input::ButtonsMax; i++) {
+        MetaCore::Events::RegisterEvent(MetaCore::Input::PressEvents, i);
+        MetaCore::Events::RegisterEvent(MetaCore::Input::ReleaseEvents, i);
+        MetaCore::Events::RegisterEvent(MetaCore::Input::HoldEvents, i);
+    }
 }
 
 extern "C" METACORE_EXPORT void setup(CModInfo* info) {

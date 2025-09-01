@@ -59,8 +59,12 @@ namespace MetaCore::Input {
     /// @return The 2-dimensional thumbstick position with axes from -1 to 1
     METACORE_EXPORT UnityEngine::Vector2 GetThumbstick(Controllers controller);
 
-    /// @brief The string identifier that maps the Buttons enum to events, when used in the "mod" parameter
-    std::string const ButtonEvents = "MetaCoreButtons";
+    /// @brief The string identifier that maps the Buttons enum to events run when they are pressed, when used in the "mod" parameter
+    std::string const PressEvents = "MetaCoreButtonPresses";
+    /// @brief The string identifier that maps the Buttons enum to events run when they are released, when used in the "mod" parameter
+    std::string const ReleaseEvents = "MetaCoreButtonReleases";
+    /// @brief The string identifier that maps the Buttons enum to events run every frame they are held, when used in the "mod" parameter
+    std::string const HoldEvents = "MetaCoreButtonHolds";
 
     /// @brief Gets the current position and rotation of a controller
     /// @param left If the left controller should be returned, otherwise the right controller
