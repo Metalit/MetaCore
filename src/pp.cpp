@@ -244,6 +244,8 @@ static void ProcessResponseBL(PP::BLSong song, BeatmapKey map) {
             return;
         }
     }
+    logger.debug("failed to find characteristic {} and difficulty {} in response", characteristic, difficulty);
+    logger.debug("{}", WriteToString(song));
     if (requests[name].AddBl(std::nullopt))
         requests.erase(name);
 }
@@ -255,7 +257,7 @@ static void GetMapInfoBL(BeatmapKey map, std::string hash) {
             requests.erase(name);
     };
 
-    std::string const url = "https://api.beatleader.xyz/map/hash/" + hash;
+    std::string const url = "https://api.beatleader.com/map/hash/" + hash;
 
     WebUtils::GetAsync<WebUtils::StringResponse>({url, std::string(MOD_ID " " VERSION)}, [map](WebUtils::StringResponse response) {
         if (!response.IsSuccessful() || !response.responseData) {
