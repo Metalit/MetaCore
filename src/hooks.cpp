@@ -530,6 +530,7 @@ static void AddSignalUpdates(UnityEngine::Component* self, std::function<void()>
 MAKE_AUTO_HOOK_MATCH(
     StandardLevelDetailView_SetContentForBeatmapData, &StandardLevelDetailView::SetContentForBeatmapData, void, StandardLevelDetailView* self
 ) {
+    logger.debug("StandardLevelDetailView SetContentForBeatmapData");
     AddSignalUpdates(self, Internals::ClearLevel, [self]() { Internals::SetLevel(self->beatmapKey, self->_beatmapLevel); });
 
     StandardLevelDetailView_SetContentForBeatmapData(self);
@@ -539,6 +540,7 @@ MAKE_AUTO_HOOK_MATCH(
 MAKE_AUTO_HOOK_MATCH(
     MissionLevelDetailViewController_RefreshContent, &MissionLevelDetailViewController::RefreshContent, void, MissionLevelDetailViewController* self
 ) {
+    logger.debug("MissionLevelDetailViewController RefreshContent");
     AddSignalUpdates(self, Internals::ClearLevel, [key = self->missionNode->missionData->beatmapKey]() {
         Internals::SetLevel(key, Songs::FindLevel(key));
     });
