@@ -1,16 +1,19 @@
 #pragma once
 
+#include "export.h"
+
+#include <set>
+
+#if __has_include("BSML/shared/Helpers/utilities.hpp")
+#include "BSML/shared/Helpers/utilities.hpp"
+#endif
+
 #include "UnityEngine/GameObject.hpp"
 #include "UnityEngine/Quaternion.hpp"
 #include "UnityEngine/Sprite.hpp"
 #include "UnityEngine/Texture2D.hpp"
 #include "UnityEngine/Transform.hpp"
 #include "UnityEngine/Vector3.hpp"
-#include "export.h"
-
-#if __has_include("BSML/shared/Helpers/utilities.hpp")
-#include "BSML/shared/Helpers/utilities.hpp"
-#endif
 
 namespace MetaCore::Engine {
     template <typename T>
@@ -134,6 +137,12 @@ namespace MetaCore::Engine {
     /// @param wait A function that returns true once the callback should be run
     /// @param callback The function to be run once the condition is true
     METACORE_EXPORT void ScheduleMainThread(std::function<bool()> wait, std::function<void()> callback);
+    /// @brief Schedules a function to be run on the main thread once a task is completed
+    /// @param task A task with an IsCompleted field or property that is set once it finishes
+    /// @param callback The function to be run once the task is finished
+    inline void AwaitMainThread(auto task, std::function<void()> callback) {
+        ScheduleMainThread([task]() { return task->IsCompleted; }, std::move(callback));
+    }
 
     /// @brief Sets a function to be run when a given object is enabled (via Unity's OnEnable callback)
     /// @param object The object to attach the callback to

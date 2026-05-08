@@ -1,6 +1,7 @@
 #pragma once
 
-#include "beatsaber-hook/shared/utils/typedefs.h"
+#include "beatsaber-hook/shared/arrayw.hpp"
+#include "beatsaber-hook/shared/types.hpp"
 
 /// @brief A struct that holds references to an asset and provides accessors to its data
 struct IncludedAsset {
@@ -25,7 +26,7 @@ struct IncludedAsset {
    private:
     void init() const {
         if (!array->klass)
-            array->klass = classof(Array<uint8_t>*);
+            array->klass = i2c::class_of<Array<uint8_t>*>();
     }
     Array<uint8_t>* const array;
 };

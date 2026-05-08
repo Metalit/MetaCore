@@ -1,8 +1,16 @@
 #pragma once
 
+#include "custom-types/shared/delegate.hpp"
+
 #include "System/Action.hpp"
 #include "System/Action_1.hpp"
+#include "System/Action_10.hpp"
 #include "System/Action_11.hpp"
+#include "System/Action_12.hpp"
+#include "System/Action_13.hpp"
+#include "System/Action_14.hpp"
+#include "System/Action_15.hpp"
+#include "System/Action_16.hpp"
 #include "System/Action_2.hpp"
 #include "System/Action_3.hpp"
 #include "System/Action_4.hpp"
@@ -10,12 +18,12 @@
 #include "System/Action_6.hpp"
 #include "System/Action_7.hpp"
 #include "System/Action_8.hpp"
+#include "System/Action_9.hpp"
 #include "UnityEngine/Events/UnityAction.hpp"
 #include "UnityEngine/Events/UnityAction_1.hpp"
 #include "UnityEngine/Events/UnityAction_2.hpp"
 #include "UnityEngine/Events/UnityAction_3.hpp"
 #include "UnityEngine/Events/UnityAction_4.hpp"
-#include "custom-types/shared/delegate.hpp"
 
 namespace MetaCore::Delegates {
     /// @brief Creates a System::Action from a std::function
@@ -43,12 +51,24 @@ namespace MetaCore::Delegates {
             return custom_types::MakeDelegate<System::Action_7<Targs...>*>(fun);
         else if constexpr (argc == 8)
             return custom_types::MakeDelegate<System::Action_8<Targs...>*>(fun);
+        else if constexpr (argc == 9)
+            return custom_types::MakeDelegate<System::Action_9<Targs...>*>(fun);
+        else if constexpr (argc == 10)
+            return custom_types::MakeDelegate<System::Action_10<Targs...>*>(fun);
         else if constexpr (argc == 11)
             return custom_types::MakeDelegate<System::Action_11<Targs...>*>(fun);
+        else if constexpr (argc == 12)
+            return custom_types::MakeDelegate<System::Action_12<Targs...>*>(fun);
+        else if constexpr (argc == 13)
+            return custom_types::MakeDelegate<System::Action_13<Targs...>*>(fun);
+        else if constexpr (argc == 14)
+            return custom_types::MakeDelegate<System::Action_14<Targs...>*>(fun);
+        else if constexpr (argc == 15)
+            return custom_types::MakeDelegate<System::Action_15<Targs...>*>(fun);
+        else if constexpr (argc == 16)
+            return custom_types::MakeDelegate<System::Action_16<Targs...>*>(fun);
 
-        static_assert(argc != 9, "System::Action_9 does not exist");
-        static_assert(argc != 10, "System::Action_10 does not exist");
-        static_assert(argc < 12, "System::Action_12 and higher do not exist");
+        static_assert(argc < 17, "System::Action_17 and higher do not exist");
     }
 
     /// @brief Creates a System::Action from a lambda

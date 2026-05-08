@@ -1,5 +1,9 @@
 #include "unity.hpp"
 
+#include "main.hpp"
+#include "operators.hpp"
+#include "types.hpp"
+
 #include "UnityEngine/Color.hpp"
 #include "UnityEngine/Graphics.hpp"
 #include "UnityEngine/ImageConversion.hpp"
@@ -8,10 +12,6 @@
 #include "UnityEngine/RenderTextureFormat.hpp"
 #include "UnityEngine/RenderTextureReadWrite.hpp"
 #include "UnityEngine/TextureFormat.hpp"
-#include "beatsaber-hook/shared/utils/il2cpp-utils.hpp"
-#include "main.hpp"
-#include "operators.hpp"
-#include "types.hpp"
 
 using namespace UnityEngine;
 
@@ -26,7 +26,7 @@ Vector3 MetaCore::Engine::GetClampedEuler(Quaternion rotation) {
 
 static void DisableAllButImpl(Transform* original, Transform* source, std::set<std::string> enabled, std::set<std::string> disabled) {
     for (int i = 0; i < source->GetChildCount(); i++) {
-        auto child = source->GetChild(i).unsafePtr();
+        auto child = source->GetChild(i).unsafe_ptr();
         std::string name = child->name;
         if (enabled.contains(name)) {
             auto loopback = child;
@@ -150,7 +150,7 @@ Texture2D* MetaCore::Engine::ScaleTexture(Texture2D* texture, int width, int hei
 
 void MetaCore::Engine::WriteTexture(Texture2D* texture, std::string file, Rect bounds) {
     auto bytes = ImageConversion::EncodeToPNG(GetReadable(texture, bounds));
-    writefile(file, std::string((char*) bytes.begin(), bytes->get_Length()));
+    writefile(file, std::string((char*) bytes.begin(), bytes.size()));
 }
 
 void MetaCore::Engine::WriteSprite(Sprite* sprite, std::string file) {

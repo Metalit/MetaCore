@@ -43,6 +43,7 @@ if(EXISTS ${ASSETS_DIRECTORY})
 
         # Create matching subdirectories in the prepended assets folder.
         get_filename_component(REL_DIR ${REL_FILE} DIRECTORY)
+
         if(NOT REL_DIR STREQUAL "")
             file(MAKE_DIRECTORY "${PREPENDED_ASSETS_DIR}/${REL_DIR}")
         endif()
@@ -50,8 +51,7 @@ if(EXISTS ${ASSETS_DIRECTORY})
         # Create a prepended copy of the asset (with 32 extra bytes at the beginning).
         add_custom_command(
             OUTPUT "${PREPENDED_ASSETS_DIR}/${REL_FILE}"
-            COMMAND ${CMAKE_COMMAND} -E echo_append "                                " >
-                    "${PREPENDED_ASSETS_DIR}/${REL_FILE}"
+            COMMAND ${CMAKE_COMMAND} -E echo_append "                                " > "${PREPENDED_ASSETS_DIR}/${REL_FILE}"
             COMMAND ${CMAKE_COMMAND} -E cat "${SRC_FILE}" >> "${PREPENDED_ASSETS_DIR}/${REL_FILE}"
             COMMAND ${CMAKE_COMMAND} -E echo_append " " >> "${PREPENDED_ASSETS_DIR}/${REL_FILE}"
             DEPENDS "${SRC_FILE}"
@@ -69,7 +69,7 @@ if(EXISTS ${ASSETS_DIRECTORY})
         add_custom_command(
             OUTPUT "${OUTPUT_OBJ}"
             COMMAND ${CMAKE_OBJCOPY} "${REL_FILE}" "${OUTPUT_OBJ}" --input-target binary
-                    --output-target elf64-aarch64 --set-section-flags binary=strings
+            --output-target elf64-aarch64 --set-section-flags binary=strings
             DEPENDS "${PREPENDED_ASSETS_DIR}/${REL_FILE}"
             WORKING_DIRECTORY "${PREPENDED_ASSETS_DIR}"
         )
@@ -102,6 +102,7 @@ if(EXISTS ${ASSETS_DIRECTORY})
 
             foreach(DIR IN LISTS DIR_LIST)
                 string(REGEX REPLACE "[^a-zA-Z0-9]" "_" NAMESPACE_PART ${DIR})
+
                 if(NAMESPACE STREQUAL "")
                     set(NAMESPACE ${NAMESPACE_PART})
                 else()
@@ -155,6 +156,7 @@ namespace IncludedAssets {
 "
     )
     list(LENGTH BINARY_ASSET_FILES COUNT)
+
     if(${COUNT} GREATER 0)
         # Check if the output file already exists.
         if(EXISTS ${ASSET_HEADER_PATH})

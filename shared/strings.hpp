@@ -1,10 +1,9 @@
 #pragma once
 
-#include <fmt/format.h>
+#include "export.h"
 
 #include <string>
-
-#include "export.h"
+#include <fmt/format.h>
 
 namespace MetaCore::Strings {
     /// @brief Santizes a path to remove all invalid characters with an aggressive whitelist

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "beatsaber-hook/shared/utils/hooking.hpp"
 #include "main.hpp"
+#include "beatsaber-hook/shared/hooking.hpp"
 
 class Hooks {
    private:
@@ -18,7 +18,7 @@ class Hooks {
     }
 };
 
-#define AUTO_INSTALL_FUNCTION(name_)                                     \
+#define AUTO_HOOK_FUNCTION(name_)                                        \
     namespace {                                                          \
         struct Auto_Install_##name_ {                                    \
             static void Install();                                       \
@@ -29,37 +29,31 @@ class Hooks {
     void Auto_Install_##name_::Install()
 
 #define AUTO_INSTALL_ORIG(name_) \
-    AUTO_INSTALL_FUNCTION(Hook_##name_) { ::Hooking::InstallOrigHook<Hook_##name_>(logger); }
+    AUTO_HOOK_FUNCTION(hook_##name_) { INSTALL_HOOK_ORIG(logger, name_); }
 
 #define AUTO_INSTALL(name_) \
-    AUTO_INSTALL_FUNCTION(Hook_##name_) { ::Hooking::InstallHook<Hook_##name_>(logger); }
+    AUTO_HOOK_FUNCTION(hook_##name_) { INSTALL_HOOK(logger, name_); }
 
-#define MAKE_AUTO_HOOK_MATCH(name_, mPtr, retval, ...)                                                                                              \
-    struct Hook_##name_ {                                                                                                                           \
-        using funcType = retval (*)(__VA_ARGS__);                                                                                                   \
-        static_assert(MATCH_HOOKABLE_ASSERT(mPtr));                                                                                                 \
-        static_assert(std::is_same_v<funcType, ::Hooking::InternalMethodCheck<decltype(mPtr)>::funcType>, "Hook method signature does not match!"); \
-        constexpr static const char* name() { return #name_; }                                                                                      \
-        static const MethodInfo* getInfo() { return ::il2cpp_utils::il2cpp_type_check::MetadataGetter<mPtr>::methodInfo(); }                        \
-        static funcType* trampoline() { return &name_; }                                                                                            \
-        static inline retval (*name_)(__VA_ARGS__) = nullptr;                                                                                       \
-        static funcType hook() { return &::Hooking::HookCatchWrapper<&hook_##name_, funcType>::wrapper; }                                           \
-        static retval hook_##name_(__VA_ARGS__);                                                                                                    \
-    };                                                                                                                                              \
-    AUTO_INSTALL(name_)                                                                                                                             \
-    retval Hook_##name_::hook_##name_(__VA_ARGS__)
+#define MAKE_AUTO_HOOK_MATCH(name_, method, ret_type, ...)                                                                       \
+    struct BS_HOOK_HIDDEN hook_##name_ {                                                                                         \
+        static constexpr auto cast_test = []<typename T>() { return requires { static_cast<T>(method); }; };                     \
+        using func_t = ret_type (*)(__VA_ARGS__);                                                                                \
+        using cast_t = ::i2c::detail::method_check<cast_test, func_t>::type;                                                     \
+        static_assert(cast_test.operator()<cast_t>(), "Hook method signature does not match!");                                  \
+        static_assert(::i2c::detail::match_hookable<static_cast<cast_t>(method)>, "Method cannot be hooked!");                   \
+        __INTERNAL_HOOK_STRUCT(name_, ::i2c::metadata_getter<static_cast<cast_t>(method)>::method_info(), ret_type, __VA_ARGS__) \
+    };                                                                                                                           \
+    AUTO_INSTALL(name_)                                                                                                          \
+    ret_type hook_##name_::hook_m_##name_(__VA_ARGS__)
 
-#define MAKE_AUTO_ORIG_HOOK_MATCH(name_, mPtr, retval, ...)                                                                                         \
-    struct Hook_##name_ {                                                                                                                           \
-        using funcType = retval (*)(__VA_ARGS__);                                                                                                   \
-        static_assert(MATCH_HOOKABLE_ASSERT(mPtr));                                                                                                 \
-        static_assert(std::is_same_v<funcType, ::Hooking::InternalMethodCheck<decltype(mPtr)>::funcType>, "Hook method signature does not match!"); \
-        constexpr static const char* name() { return #name_; }                                                                                      \
-        static const MethodInfo* getInfo() { return ::il2cpp_utils::il2cpp_type_check::MetadataGetter<mPtr>::methodInfo(); }                        \
-        static funcType* trampoline() { return &name_; }                                                                                            \
-        static inline retval (*name_)(__VA_ARGS__) = nullptr;                                                                                       \
-        static funcType hook() { return &::Hooking::HookCatchWrapper<&hook_##name_, funcType>::wrapper; }                                           \
-        static retval hook_##name_(__VA_ARGS__);                                                                                                    \
-    };                                                                                                                                              \
-    AUTO_INSTALL_ORIG(name_)                                                                                                                        \
-    retval Hook_##name_::hook_##name_(__VA_ARGS__)
+#define MAKE_AUTO_ORIG_HOOK_MATCH(name_, method, ret_type, ...)                                                                  \
+    struct BS_HOOK_HIDDEN hook_##name_ {                                                                                         \
+        static constexpr auto cast_test = []<typename T>() { return requires { static_cast<T>(method); }; };                     \
+        using func_t = ret_type (*)(__VA_ARGS__);                                                                                \
+        using cast_t = ::i2c::detail::method_check<cast_test, func_t>::type;                                                     \
+        static_assert(cast_test.operator()<cast_t>(), "Hook method signature does not match!");                                  \
+        static_assert(::i2c::detail::match_hookable<static_cast<cast_t>(method)>, "Method cannot be hooked!");                   \
+        __INTERNAL_HOOK_STRUCT(name_, ::i2c::metadata_getter<static_cast<cast_t>(method)>::method_info(), ret_type, __VA_ARGS__) \
+    };                                                                                                                           \
+    AUTO_INSTALL_ORIG(name_)                                                                                                     \
+    ret_type hook_##name_::hook_m_##name_(__VA_ARGS__)

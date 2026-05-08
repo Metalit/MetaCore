@@ -2,28 +2,23 @@
 
 #include "jtypes.hpp"
 #include "main.hpp"
-
-struct cleanup {
-    cleanup(std::function<void()> fn) : fn(fn) {}
-    ~cleanup() { fn(); }
-
-    std::function<void()> fn;
-};
+#include "beatsaber-hook/shared/exceptions.hpp"
+#include "beatsaber-hook/shared/utils.hpp"
 
 #define EXCEPTION_CLEANUP                                          \
-    cleanup exceptionCleanup([env]() {                             \
+    i2c::on_scope_exit exceptionCleanup([env]() {                  \
         if (env->ExceptionCheck()) {                               \
             jthrowable exc = env->ExceptionOccurred();             \
             env->ExceptionClear();                                 \
             logger.warn("JNI error: {}", DescribeError(env, exc)); \
-            throw std::runtime_error(ToString(env, exc));          \
+            throw i2c::trace_exception(ToString(env, exc));        \
         }                                                          \
     })
 
 #define GET_VA(arg)    \
     va_list va;        \
     va_start(va, arg); \
-    cleanup vaCleanup([&va]() { va_end(va); })
+    i2c::on_scope_exit vaCleanup([&va]() { va_end(va); })
 
 JNIEnv* MetaCore::Java::GetEnv() {
     JNIEnv* env;
@@ -147,9 +142,8 @@ jclass MetaCore::Java::LoadClass(JNIEnv* env, std::string name, std::string_view
 
     auto dexBuffer = env->NewDirectByteBuffer((void*) dexBytes.data(), dexBytes.length() - 1);
 
-    // not sure if necessary to run this on the UnityPlayer class
     auto baseClassLoader = RunMethod<jobject>(
-        env, {GetClass(env, {"java/lang/Class"}), GetClass(env, {"com/unity3d/player/UnityPlayer"})}, {"getClassLoader", "()Ljava/lang/ClassLoader;"}
+        env, {GetClass(env, {"java/lang/Class"}), GetClass(env, {"java/lang/Class"})}, {"getClassLoader", "()Ljava/lang/ClassLoader;"}
     );
 
     auto classLoader =
