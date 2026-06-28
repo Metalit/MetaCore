@@ -6,7 +6,7 @@
   "author": "Metalit",
   "packageId": "com.beatgames.beatsaber",
   "packageVersion": "1.42.3_15380",
-  "description": "Beat Saber-specific utilities for mod developers",
+  "description": "Generic utilities for mod developers",
   "dependencies": [],
   "modFiles": ["${binary}"],
   "lateModFiles": [],
