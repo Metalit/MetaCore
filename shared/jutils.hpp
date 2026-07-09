@@ -1,10 +1,9 @@
 #pragma once
 
-#include <jni.h>
+#include "export.h"
 
 #include <string>
-
-#include "export.h"
+#include <jni.h>
 
 /* JNI field and method signatures
 - Field signatures are simply their type in JNI form.
@@ -71,6 +70,9 @@ namespace MetaCore::Java {
         /// @brief Constructor with an already known java field id
         /// @param field The already known java field id to use
         FindFieldID(jfieldID field) : field(field) {}
+        /// @brief Constructor with the name and signature of a java field
+        /// @param name The name of a java field
+        /// @param signature The signature of a java field
         FindFieldID(std::string name, std::string signature) : name(name), signature(signature) {}
     };
 

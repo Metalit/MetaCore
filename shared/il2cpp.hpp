@@ -1,10 +1,12 @@
 #pragma once
 
+#include "beatsaber-hook/shared/arrayw.hpp"
+#include "beatsaber-hook/shared/types.hpp"
+
 #include <fmt/format.h>
 
 #include "System/Collections/Generic/Dictionary_2.hpp"
 #include "System/Collections/Generic/InsertionBehavior.hpp"
-#include "beatsaber-hook/shared/utils/typedefs.h"
 
 // experimental
 
@@ -19,7 +21,7 @@ struct ConstArray {
 
     void init() const noexcept {
         if (!this->klass)
-            const_cast<ConstArray<T, N>*>(this)->klass = classof(Array<T>*);
+            const_cast<ConstArray<T, N>*>(this)->klass = i2c::class_of<Array<T>*>();
     }
 
     constexpr Array<T>* to_array() {
@@ -219,19 +221,11 @@ struct DictionaryW {
 };
 
 MARK_GEN_REF_T(DictionaryW);
-static_assert(il2cpp_utils::has_il2cpp_conversion<DictionaryW<int, int>>);
+static_assert(i2c::type_check::wrapper_ref_type<DictionaryW<int, int>>);
 
 template <typename TKey, typename TValue>
-struct BS_HOOKS_HIDDEN ::il2cpp_utils::il2cpp_type_check::need_box<DictionaryW<TKey, TValue>> {
-    constexpr static bool value = false;
-};
-
-template <typename TKey, typename TValue>
-struct BS_HOOKS_HIDDEN ::il2cpp_utils::il2cpp_type_check::il2cpp_no_arg_class<DictionaryW<TKey, TValue>> {
-    static inline Il2CppClass* get() {
-        auto klass = ::il2cpp_utils::il2cpp_type_check::il2cpp_no_arg_class<typename DictionaryW<TKey, TValue>::Wrapped*>::get();
-        return klass;
-    }
+struct BS_HOOK_HIDDEN i2c::type_check::no_arg_class<DictionaryW<TKey, TValue>> {
+    static inline Il2CppClass* get() { return i2c::class_of<typename DictionaryW<TKey, TValue>::Wrapped*>(); }
 };
 
 template <typename TKey, typename TValue, typename Char>

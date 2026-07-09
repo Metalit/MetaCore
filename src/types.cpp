@@ -1,8 +1,8 @@
 #include "types.hpp"
 
+#include <queue>
+
 DEFINE_TYPE(MetaCore, ObjectSignal);
-DEFINE_TYPE(MetaCore, EndDragHandler);
-DEFINE_TYPE(MetaCore, KeyboardCloseHandler);
 DEFINE_TYPE(MetaCore, MainThreadScheduler);
 
 std::unordered_map<int, std::function<void()>> MetaCore::ObjectSignal::onDestroys;
@@ -15,11 +15,6 @@ void MetaCore::ObjectSignal::OnEnable() {
 void MetaCore::ObjectSignal::OnDisable() {
     if (onDisable)
         onDisable();
-}
-
-void MetaCore::EndDragHandler::OnPointerUp(UnityEngine::EventSystems::PointerEventData* eventData) {
-    if (callback)
-        callback();
 }
 
 static std::mutex callbacksMutex;
