@@ -44,12 +44,12 @@ jobs:
       - name: Get Output Names
         id: names
         run: |
-          qmod_files=( "*.qmod" )
+          qmod_files=( $"*.qmod" )
           echo "QMOD=${qmod_files[0]}" >> ${GITHUB_OUTPUT}
 
           cd build
 
-          lib_files=( "lib${module_id}*.so" )
+          lib_files=( $"lib${module_id}*.so" )
           echo "LIB=${lib_files[0]}" >> ${GITHUB_OUTPUT}
 
       - name: Upload Artifact
