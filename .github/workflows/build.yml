@@ -44,11 +44,11 @@ jobs:
       - name: Get Output Names
         id: names
         run: |
+          ls
           qmod_file=*.qmod
           echo "QMOD=${qmod_file}" >> ${GITHUB_OUTPUT}
-
           cd build
-
+          ls
           lib_file=lib${module_id}*.so
           echo "LIB=${lib_file}" >> ${GITHUB_OUTPUT}
 
