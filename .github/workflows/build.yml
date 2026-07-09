@@ -44,13 +44,13 @@ jobs:
       - name: Get Output Names
         id: names
         run: |
-          ls
-          qmod_file=*.qmod
-          echo "QMOD=${qmod_file}" >> ${GITHUB_OUTPUT}
+          pattern="*.qmod"
+          files=( $pattern )
+          echo QMOD="${files[0]}" >> $GITHUB_OUTPUT
           cd build
-          ls
-          lib_file=lib${module_id}*.so
-          echo "LIB=${lib_file}" >> ${GITHUB_OUTPUT}
+          pattern="lib${module_id}*.so"
+          files=( $pattern )
+          echo LIB="${files[0]}" >> $GITHUB_OUTPUT
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v6
