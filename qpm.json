@@ -6,7 +6,7 @@
   "info": {
     "name": "MetaCore",
     "id": "metacore",
-    "version": "2.0.0",
+    "version": "2.0.2",
     "url": "https://github.com/Metalit/MetaCore",
     "additionalData": {
       "overrideSoName": "libmetacore.so",
@@ -82,7 +82,7 @@
     },
     {
       "id": "bs-cordl",
-      "versionRange": "^4401.1.0",
+      "versionRange": "^4402.0.0",
       "additionalData": {}
     },
     {
