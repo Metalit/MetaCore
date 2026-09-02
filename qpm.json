@@ -6,7 +6,7 @@
   "info": {
     "name": "MetaCore",
     "id": "metacore",
-    "version": "2.0.2",
+    "version": "2.0.3",
     "url": "https://github.com/Metalit/MetaCore",
     "additionalData": {
       "overrideSoName": "libmetacore.so",
@@ -22,7 +22,7 @@
         "python ./extern/includes/mod-scripts/shared/cpy.py $0:?"
       ],
       "dbg": [
-        "python ./extern/includes/mod-scripts/shared/dbg.py $0:?"
+        "python ./extern/includes/mod-scripts/shared/debug.py $0:?"
       ],
       "log": [
         "python ./extern/includes/mod-scripts/shared/log.py $0:?"
@@ -52,7 +52,7 @@
   "dependencies": [
     {
       "id": "mod-scripts",
-      "versionRange": "^1.0.0",
+      "versionRange": "^1.0.2",
       "additionalData": {
         "private": true
       }
@@ -67,7 +67,7 @@
     },
     {
       "id": "paper2_scotland2",
-      "versionRange": "^4.7.0",
+      "versionRange": "^4.8.0",
       "additionalData": {}
     },
     {
@@ -77,12 +77,12 @@
     },
     {
       "id": "beatsaber-hook",
-      "versionRange": "^8.0.0",
+      "versionRange": "^8.1.0",
       "additionalData": {}
     },
     {
       "id": "bs-cordl",
-      "versionRange": "^4403.0.0",
+      "versionRange": "^4500.0.0",
       "additionalData": {}
     },
     {
