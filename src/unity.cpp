@@ -198,7 +198,8 @@ void MetaCore::Engine::QuaternionAverage::AddRotation(Quaternion rot) {
     // remove y rotation from average on 360 degree levels
     if (ignoreY) {
         // calculate rotation around y axis (euler angles are in the wrong order)
-        auto yRot = Quaternion::Normalize({0, rot.y, 0, rot.w});
+        auto yRot = Quaternion{0, rot.y, 0, rot.w};
+        yRot.Normalize();
         // multiply to undo y axis rotation, inverse first to use global y axis
         rot = Quaternion::Inverse(yRot) * rot;
     }
