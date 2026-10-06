@@ -6,7 +6,7 @@
   "info": {
     "name": "MetaCore",
     "id": "metacore",
-    "version": "2.0.3",
+    "version": "2.0.4",
     "url": "https://github.com/Metalit/MetaCore",
     "additionalData": {
       "overrideSoName": "libmetacore.so",
@@ -77,17 +77,17 @@
     },
     {
       "id": "beatsaber-hook",
-      "versionRange": "^8.1.0",
+      "versionRange": "^9.0.0",
       "additionalData": {}
     },
     {
       "id": "bs-cordl",
-      "versionRange": "^4500.0.0",
+      "versionRange": "^4502.1.0",
       "additionalData": {}
     },
     {
       "id": "custom-types",
-      "versionRange": "^0.20.0",
+      "versionRange": "^0.21.1",
       "additionalData": {
         "private": true
       }
