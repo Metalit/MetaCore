@@ -1,5 +1,9 @@
 #include "pp.hpp"
 
+#include <atomic>
+#include <chrono>
+#include <cmath>
+
 #include "GlobalNamespace/BeatmapCharacteristicSO.hpp"
 #include "GlobalNamespace/BeatmapDifficulty.hpp"
 #include "GlobalNamespace/BeatmapDifficultySerializedMethods.hpp"
@@ -8,6 +12,7 @@
 #include "events.hpp"
 #include "main.hpp"
 #include "maps.hpp"
+#include "ppv4map.hpp"
 #include "song-details/shared/SongDetails.hpp"
 #include "songs.hpp"
 #include "types.hpp"
@@ -16,46 +21,39 @@
 using namespace GlobalNamespace;
 using namespace MetaCore;
 
-static CacheMap<std::string, std::pair<std::optional<PP::BLSongDiff>, std::optional<PP::SSSongDiff>>, 32> songCache;
+using Clock = std::chrono::steady_clock;
+struct MapInfo {
+    std::optional<PP::BLSongDiff> bl;
+    std::optional<PP::SSSongDiff> ss;
+    Clock::time_point fetched;
+};
+static CacheMap<std::string, MapInfo, 32> songCache;
 
 struct Request {
-    using callback = std::function<void(std::optional<PP::BLSongDiff>, std::optional<PP::SSSongDiff>)>;
-
-    std::string const key;
-
-    std::optional<PP::BLSongDiff> blSong = std::nullopt;
+    using Callback = std::function<void(std::optional<PP::BLSongDiff>, std::optional<PP::SSSongDiff>)>;
+    uint64_t ticket;
+    std::optional<PP::BLSongDiff> blSong;
+    std::optional<PP::SSSongDiff> ssSong;
     bool hasBl = false;
-    std::optional<PP::SSSongDiff> ssSong = std::nullopt;
     bool hasSs = false;
-
-    std::vector<callback> callbacks{};
-
-    bool CheckDone() {
-        if (!hasBl || !hasSs)
-            return false;
-        for (auto& callback : callbacks)
-            callback(blSong, ssSong);
-        songCache.push(key, std::make_pair(std::move(blSong), std::move(ssSong)));
-        return true;
-    }
-
-    bool AddBl(std::optional<PP::BLSongDiff> song) {
-        blSong = song;
-        hasBl = true;
-        return CheckDone();
-    }
-
-    bool AddSs(std::optional<PP::SSSongDiff> song) {
-        ssSong = song;
-        hasSs = true;
-        return CheckDone();
-    }
-
-    Request() = default;
-    Request(std::string key) : key(std::move(key)) {}
+    std::vector<Callback> callbacks;
 };
 
 static std::map<std::string, Request> requests;
+static uint64_t nextTicket = 0;
+
+static void CompleteRequest(std::string const& name) {
+    auto it = requests.find(name);
+    if (it == requests.end() || !it->second.hasBl || !it->second.hasSs)
+        return;
+    auto request = std::move(it->second);
+    requests.erase(it);
+    // Failed BeatLeader requests can be retried instead of being cached as unranked maps.
+    if (request.blSong)
+        songCache.push(name, {request.blSong, request.ssSong, Clock::now()});
+    for (auto& callback : request.callbacks)
+        callback(request.blSong, request.ssSong);
+}
 
 static constexpr double ScoresaberMult = 42.117208413;
 
@@ -176,7 +174,10 @@ bool PP::IsRanked(PP::SSSongDiff const& map) {
 }
 
 float PP::Calculate(PP::BLSongDiff const& map, float percentage, GameplayModifiers* modifiers, bool failed) {
-    if (failed)
+    if (map.extraFields)
+        return TryCalculate(map, percentage, modifiers, failed).value_or(0);
+    // Hand-built ratings (such as settings previews) have no map-specific PPv4 data.
+    if (failed || !modifiers || !std::isfinite(percentage) || percentage < 0 || percentage > 1)
         return 0;
     float passRating = map.Pass;
     float accRating = map.Acc;
@@ -223,6 +224,17 @@ float PP::Calculate(PP::BLSongDiff const& map, float percentage, GameplayModifie
     return rawPP;
 }
 
+std::optional<float> PP::TryCalculate(PP::BLSongDiff const& map, float percentage, GameplayModifiers* modifiers, bool failed) {
+    if (!modifiers)
+        return std::nullopt;
+    auto context = PPv4::Prepare(map, GetModStringsBL(modifiers, true, failed));
+    if (!context)
+        return std::nullopt;
+    if (failed)
+        return 0;
+    return context->Evaluate(percentage).total;
+}
+
 float PP::Calculate(PP::SSSongDiff const& map, float percentage, GameplayModifiers* modifiers, bool failed) {
     if (failed)
         percentage /= 2;
@@ -230,98 +242,80 @@ float PP::Calculate(PP::SSSongDiff const& map, float percentage, GameplayModifie
     return multiplier * map * ScoresaberMult;
 }
 
-static void ProcessResponseBL(PP::BLSong song, BeatmapKey map) {
-    logger.debug("processing bl respose");
+static void GetMapInfoBL(BeatmapKey map, std::string hash, uint64_t ticket) {
     std::string const characteristic = map.beatmapCharacteristic->serializedName;
     std::string const difficulty = BeatmapDifficultySerializedMethods::SerializedName(map.difficulty);
     std::string const name = map.SerializedName();
-
-    for (auto const& diff : song.Difficulties) {
-        if (diff.Characteristic == characteristic && diff.Difficulty == difficulty) {
-            logger.debug("found correct difficulty, {:.2f} stars", diff.Stars);
-            if (requests[name].AddBl(std::move(diff)))
-                requests.erase(name);
-            return;
+    auto const url =
+        "https://api.beatleader.xyz/leaderboard/" + hash + "/" + PPv4::EncodeSegment(difficulty) + "/" + PPv4::EncodeSegment(characteristic);
+    WebUtils::URLOptions options{url, std::string(MOD_ID " " VERSION), 15};
+    options.noEscape = true;
+    WebUtils::GetAsync<WebUtils::StringResponse>(options, [name, difficulty, characteristic, ticket](WebUtils::StringResponse response) {
+        std::optional<PP::BLSongDiff> song;
+        if (response.IsSuccessful() && response.responseData) {
+            song = PPv4::ParseMap(*response.responseData);
+            if (song && (song->Difficulty != difficulty || song->Characteristic != characteristic))
+                song.reset();
+            if (!song)
+                logger.warn("invalid BeatLeader PP response for {}", name);
+        } else {
+            logger.warn("BeatLeader PP request failed {} {}", response.httpCode, response.curlStatus);
         }
-    }
-    logger.debug("failed to find characteristic {} and difficulty {} in response", characteristic, difficulty);
-    logger.debug("{}", WriteToString(song));
-    if (requests[name].AddBl(std::nullopt))
-        requests.erase(name);
-}
-
-static void GetMapInfoBL(BeatmapKey map, std::string hash) {
-    static auto const setNone = [](BeatmapKey map) mutable {
-        std::string name = map.SerializedName();
-        if (requests[name].AddBl(std::nullopt))
-            requests.erase(name);
-    };
-
-    std::string const url = "https://api.beatleader.com/map/hash/" + hash;
-
-    WebUtils::GetAsync<WebUtils::StringResponse>({url, std::string(MOD_ID " " VERSION)}, [map](WebUtils::StringResponse response) {
-        if (!response.IsSuccessful() || !response.responseData) {
-            logger.error("bl pp request failed {} {}", response.httpCode, response.curlStatus);
-            setNone(map);
-            return;
-        }
-        logger.debug("got bl respose");
-        PP::BLSong song;
-        try {
-            ReadFromString(*response.responseData, song);
-            MainThreadScheduler::Schedule([song = std::move(song), map]() { ProcessResponseBL(std::move(song), map); });
-        } catch (std::exception const& e) {
-            logger.error("failed to parse beatleader response: {}", e.what());
-            logger.debug("{}", *response.responseData);
-            setNone(map);
-        }
+        MainThreadScheduler::Schedule([name, ticket, song = std::move(song)]() {
+            auto it = requests.find(name);
+            if (it == requests.end() || it->second.ticket != ticket)
+                return;
+            it->second.blSong = song;
+            it->second.hasBl = true;
+            CompleteRequest(name);
+        });
     });
 }
 
-static SongDetailsCache::SongDetails* songDetailsInstance = nullptr;
+static std::atomic<SongDetailsCache::SongDetails*> songDetailsInstance = nullptr;
 
 static void GetSongDetails(auto&& callback) {
-    if (songDetailsInstance) {
-        callback(songDetailsInstance);
+    if (auto instance = songDetailsInstance.load()) {
+        callback(instance);
         return;
     }
 
     logger.debug("initializing song details");
 
     std::thread([callback]() mutable {
-        songDetailsInstance = SongDetailsCache::SongDetails::Init().get();
-        callback(songDetailsInstance);
+        SongDetailsCache::SongDetails* instance = nullptr;
+        try {
+            instance = SongDetailsCache::SongDetails::Init().get();
+            songDetailsInstance.store(instance);
+        } catch (std::exception const& e) {
+            logger.warn("song details initialization failed: {}", e.what());
+        }
+        callback(instance);
     }).detach();
 }
 
-static void GetMapInfoSS(BeatmapKey map, std::string hash) {
+static void GetMapInfoSS(BeatmapKey map, std::string hash, uint64_t ticket) {
     std::string const characteristic = map.beatmapCharacteristic->serializedName;
     int const difficulty = (int) map.difficulty;
     std::string const name = map.SerializedName();
 
-    GetSongDetails([name, hash, characteristic, difficulty](auto details) {
-        auto const setNone = [&name]() {
-            if (requests[name].AddSs(std::nullopt))
-                requests.erase(name);
-        };
-
-        logger.debug("got song details");
-        auto const& song = details->songs.FindByHash(hash);
-        if (song == SongDetailsCache::Song::none) {
-            setNone();
-            return;
+    GetSongDetails([name, hash, characteristic, difficulty, ticket](auto details) {
+        std::optional<PP::SSSongDiff> stars;
+        if (details) {
+            auto const& song = details->songs.FindByHash(hash);
+            if (song != SongDetailsCache::Song::none) {
+                auto const& diff = song.GetDifficulty((SongDetailsCache::MapDifficulty) difficulty, characteristic);
+                if (diff != SongDetailsCache::SongDifficulty::none)
+                    stars = diff.starsSS;
+            }
         }
-        logger.debug("processing song details");
-        auto const& diff = song.GetDifficulty((SongDetailsCache::MapDifficulty) difficulty, characteristic);
-        if (diff == SongDetailsCache::SongDifficulty::none) {
-            setNone();
-            return;
-        }
-        logger.debug("found correct difficulty, {:.2f} stars", diff.starsSS);
-
-        MainThreadScheduler::Schedule([name, stars = diff.starsSS]() {
-            if (requests[name].AddSs(stars))
-                requests.erase(name);
+        MainThreadScheduler::Schedule([name, ticket, stars]() {
+            auto it = requests.find(name);
+            if (it == requests.end() || it->second.ticket != ticket)
+                return;
+            it->second.ssSong = stars;
+            it->second.hasSs = true;
+            CompleteRequest(name);
         });
     });
 }
@@ -329,12 +323,18 @@ static void GetMapInfoSS(BeatmapKey map, std::string hash) {
 void PP::GetMapInfo(BeatmapKey map, std::function<void(std::optional<BLSongDiff>, std::optional<SSSongDiff>)> callback) {
     if (!callback)
         return;
+    if (!map.IsValid()) {
+        callback(std::nullopt, std::nullopt);
+        return;
+    }
 
     std::string const name = map.SerializedName();
     if (songCache.contains(name)) {
-        auto const& [bl, ss] = songCache[name];
-        callback(bl, ss);
-        return;
+        auto const info = songCache[name];
+        if (Clock::now() - info.fetched < std::chrono::minutes(10)) {
+            callback(info.bl, info.ss);
+            return;
+        }
     }
     if (requests.contains(name)) {
         requests[name].callbacks.emplace_back(std::move(callback));
@@ -350,8 +350,15 @@ void PP::GetMapInfo(BeatmapKey map, std::function<void(std::optional<BLSongDiff>
 
     logger.info("requesting PP info for {}", hash);
 
-    requests.emplace(name, name).first->second.callbacks.emplace_back(std::move(callback));
+    auto ticket = ++nextTicket;
+    requests.emplace(name, Request{ticket}).first->second.callbacks.emplace_back(std::move(callback));
 
-    GetMapInfoBL(map, hash);
-    GetMapInfoSS(map, hash);
+    GetMapInfoBL(map, hash, ticket);
+    GetMapInfoSS(map, hash, ticket);
+}
+
+ON_EVENT(Events::SoftRestart) {
+    requests.clear();
+    songCache.clear();
+    PPv4::ClearCache();
 }

@@ -21,6 +21,8 @@ namespace MetaCore::PP {
 
     /// @brief BeatLeader ranking information for a specific characteristic/difficulty of a map
     DECLARE_JSON_STRUCT(BLSongDiff) {
+        // Retain PPv4 metadata without changing the layout used by existing mods.
+        KEEP_EXTRA_FIELDS;
         NAMED_VALUE(std::string, Difficulty, "difficultyName");
         NAMED_VALUE(std::string, Characteristic, "modeName");
         NAMED_VALUE_DEFAULT(int, RankedStatus, 0, "status");
@@ -41,7 +43,7 @@ namespace MetaCore::PP {
     /// @brief ScoreSaber ranking information for a specific characteristic/difficulty of a map (just a star rating)
     using SSSongDiff = float;
 
-    /// @brief The acc to PP calculation cure for BeatLeader
+    /// @brief The legacy BeatLeader curve. PPv4 uses map-specific curves through Calculate or TryCalculate.
     METACORE_EXPORT extern std::vector<std::pair<double, double>> const BeatLeaderCurve;
     /// @brief The acc to PP calculation cure for ScoreSaber
     METACORE_EXPORT extern std::vector<std::pair<double, double>> const ScoreSaberCurve;
@@ -73,7 +75,11 @@ namespace MetaCore::PP {
     /// @param modifiers The current gameplay modifiers
     /// @param failed If the player's health has reached 0, with or without No Fail
     /// @return The exact PP value
+    /// @note Map data returned by GetMapInfo uses PPv4. Hand-built ratings without map metadata keep the legacy estimate.
     METACORE_EXPORT float Calculate(BLSongDiff const& map, float accuracy, GlobalNamespace::GameplayModifiers* modifiers, bool failed);
+    /// @brief Calculates BeatLeader PPv4, returning no value when the map's PPv4 data is unavailable
+    METACORE_EXPORT std::optional<float>
+    TryCalculate(BLSongDiff const& map, float accuracy, GlobalNamespace::GameplayModifiers* modifiers, bool failed);
     /// @brief Calculates the ScoreSaber PP value for a given accuracy, map, and modifiers
     /// @param map The ScoreSaber ranking information
     /// @param accuracy The accuracy value from 0 to 1
@@ -83,7 +89,9 @@ namespace MetaCore::PP {
     METACORE_EXPORT float Calculate(SSSongDiff const& map, float accuracy, GlobalNamespace::GameplayModifiers* modifiers, bool failed);
 
     /// @brief Finds the BeatLeader and ScoreSaber ranking information for a given map characteristic/difficulty
+    /// @note Call from the main thread
     /// @param map The map characteristic/difficulty to query
-    /// @param callback A callback called with the available ranking info once found
-    METACORE_EXPORT void GetMapInfo(GlobalNamespace::BeatmapKey map, std::function<void(std::optional<BLSongDiff>, std::optional<SSSongDiff>)> callback);
+    /// @param callback A callback called on the main thread with the available ranking info once found
+    METACORE_EXPORT void
+    GetMapInfo(GlobalNamespace::BeatmapKey map, std::function<void(std::optional<BLSongDiff>, std::optional<SSSongDiff>)> callback);
 }

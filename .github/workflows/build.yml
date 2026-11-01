@@ -45,6 +45,9 @@ jobs:
           echo libs:
           ls -la ${GITHUB_WORKSPACE}/extern/libs
 
+      - name: Test PPv4
+        run: python3 scripts/test-ppv4.py
+
       - name: Build & create qmod
         run: |
           cd ${GITHUB_WORKSPACE}
